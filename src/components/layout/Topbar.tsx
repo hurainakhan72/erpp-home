@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { Search, LogOut, ShieldCheck as ShieldIcon, LayoutDashboard, Users, CalendarCheck, CalendarDays, DollarSign, TrendingUp, ScrollText, Settings, ClipboardList, Clock, CalendarRange, Bell, Zap } from "lucide-react";
+import { Search, LogOut, ShieldCheck as ShieldIcon, LayoutDashboard, Users, CalendarCheck, CalendarDays, DollarSign, TrendingUp, ScrollText, Settings, ClipboardList, Clock, CalendarRange, Bell, Zap, Wallet } from "lucide-react";
 import { useData } from "../../context/DataContext";
 
 const routeNames: Record<string, string> = {
@@ -80,7 +80,7 @@ export default function Topbar() {
     '/onboarding': Users,
     '/org-management': Settings,
     '/attendance-verification': CalendarCheck,
-    '/leave-wallet': "Leave Wallet",
+    '/leave-wallet': Wallet,
     '/penalty-ledger': ClipboardList,
     '/announcements': Bell,
     '/security-settings': ShieldIcon,
@@ -97,6 +97,7 @@ export default function Topbar() {
     '/my-attendance': CalendarCheck,
     '/my-payslips': CalendarRange,
     '/my-leave': CalendarDays,
+    '/my-leave-wallet': Wallet,
     '/my-penalties': ClipboardList,
     '/my-profile': Users,
   };

@@ -25,13 +25,10 @@ import AuditLog from "./pages/AuditLog";
 import BranchHRDashboard from "./pages/BranchHRDashboard";
 import PenaltyWorkflow from "./pages/PenaltyWorkflow";
 import LeaveCapacity from "./pages/LeaveCapacity";
-import OnboardingCredentials from "./pages/OnboardingCredentials";
-import OrgManagement from "./pages/OrgManagement";
 import AttendanceVerification from "./pages/AttendanceVerification";
 import LeaveWalletHistory from "./pages/LeaveWalletHistory";
 import PenaltyLedger from "./pages/PenaltyLedger";
 import AnnouncementsFeed from "./pages/AnnouncementsFeed";
-import SecuritySettings from "./pages/SecuritySettings";
 import Directory from "./pages/Directory";
 import EmployeeWidgets from "./pages/EmployeeWidgets";
 
@@ -113,13 +110,10 @@ const App = () => (
                 <Route path="/hr/branch-dashboard" element={<BranchHRDashboard />} />
                 <Route path="/penalty-workflow" element={<PenaltyWorkflow />} />
                 <Route path="/leave-capacity" element={<LeaveCapacity />} />
-                <Route path="/onboarding" element={<OnboardingCredentials />} />
-                <Route path="/org-management" element={<OrgManagement />} />
                 <Route path="/attendance-verification" element={<AttendanceVerification />} />
                 <Route path="/leave-wallet" element={<LeaveWalletHistory />} />
                 <Route path="/penalty-ledger" element={<PenaltyLedger />} />
                 <Route path="/announcements" element={<AnnouncementsFeed />} />
-                <Route path="/security-settings" element={<SecuritySettings />} />
                 <Route path="/directory" element={<Directory />} />
                 <Route path="/employees" element={<Employees />} />
                 <Route path="/employees/add" element={<AddEmployee />} />
@@ -162,6 +156,7 @@ const App = () => (
                 <Route path="/my-profile" element={<MyProfile />} />
                 <Route path="/my-widgets" element={<EmployeeWidgets />} />
                 <Route path="/my-leave-wallet" element={<LeaveWalletHistory />} />
+                <Route path="/my-directory" element={<Directory />} />
               </Route>
             </Route>
 

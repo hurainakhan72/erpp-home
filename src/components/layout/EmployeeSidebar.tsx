@@ -10,6 +10,7 @@ import {
   LogOut,
   Zap,
   AlertTriangle,
+  Users,
 } from "lucide-react";
 
 export default function EmployeeSidebar() {
@@ -21,6 +22,7 @@ export default function EmployeeSidebar() {
     { to: "/my-leave", icon: CalendarDays, label: "Apply for Leave" },
     { to: "/my-leave-wallet", icon: CalendarDays, label: "Leave Wallet" },
     { to: "/my-penalties", icon: AlertTriangle, label: "My Penalties" },
+    { to: "/my-directory", icon: Users, label: "Directory" },
     { to: "/my-widgets", icon: LayoutDashboard, label: "My Widgets" },
     { to: "/my-profile", icon: User, label: "My Profile" },
   ];
