@@ -23,6 +23,8 @@ import Promotions from "./pages/Promotions";
 import Accounts from "./pages/Accounts";
 import AuditLog from "./pages/AuditLog";
 import BranchHRDashboard from "./pages/BranchHRDashboard";
+import HeadOfficeHR from "./pages/HeadOfficeHR";
+import AttendanceReport from "./pages/AttendanceReport";
 import PenaltyWorkflow from "./pages/PenaltyWorkflow";
 import LeaveCapacity from "./pages/LeaveCapacity";
 import AttendanceVerification from "./pages/AttendanceVerification";
@@ -105,15 +107,9 @@ const App = () => (
             {/* --- ADMIN & HR ROUTES (MainLayout) --- */}
             <Route element={<ProtectedRoute allowedRoles={["super_admin", "admin", "hr"]} />}>
               <Route element={<MainLayout />}>
+                {/* Shared routes: both HR and SuperAdmin */}
                 <Route path="/launchpad" element={<Launchpad />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/hr/branch-dashboard" element={<BranchHRDashboard />} />
-                <Route path="/penalty-workflow" element={<PenaltyWorkflow />} />
-                <Route path="/leave-capacity" element={<LeaveCapacity />} />
-                <Route path="/attendance-verification" element={<AttendanceVerification />} />
-                <Route path="/leave-wallet" element={<LeaveWalletHistory />} />
-                <Route path="/penalty-ledger" element={<PenaltyLedger />} />
-                <Route path="/announcements" element={<AnnouncementsFeed />} />
                 <Route path="/directory" element={<Directory />} />
                 <Route path="/employees" element={<Employees />} />
                 <Route path="/employees/add" element={<AddEmployee />} />
@@ -123,10 +119,21 @@ const App = () => (
                 <Route path="/leave" element={<Leave />} />
                 <Route path="/payroll" element={<Payroll />} />
                 <Route path="/promotions" element={<Promotions />} />
-                <Route path="/accounts" element={<Accounts />} />
-                <Route path="/audit-log" element={<AuditLog />} />
+                <Route path="/leave-wallet" element={<LeaveWalletHistory />} />
+                <Route path="/penalty-ledger" element={<PenaltyLedger />} />
+                <Route path="/announcements" element={<AnnouncementsFeed />} />
                 
-                {/* Settings Nested Routes */}
+                {/* HR Workflow Pages: Branch HR executes, SuperAdmin watches */}
+                <Route path="/hr/branch-dashboard" element={<BranchHRDashboard />} />
+                <Route path="/attendance-verification" element={<AttendanceVerification />} />
+                <Route path="/attendance-head-review" element={<HeadOfficeHR />} />
+                <Route path="/leave-capacity" element={<LeaveCapacity />} />
+                <Route path="/penalty-workflow" element={<PenaltyWorkflow />} />
+                
+                {/* Final Report & Oversight */}
+                <Route path="/attendance-report" element={<AttendanceReport />} />
+                
+                {/* Configuration Pages */}
                 <Route path="/settings/departments" element={<DepartmentsPage />} />
                 <Route path="/settings/reporting-managers" element={<ReportingManagersPage />} />
                 <Route path="/settings/designations" element={<DesignationsPage />} />
@@ -141,7 +148,13 @@ const App = () => (
                 <Route path="/settings/penalties-config" element={<PenaltiesConfigPage />} />
                 <Route path="/settings/tax-config" element={<TaxConfigPage />} />
                 <Route path="/settings/global-days" element={<GlobalDaysPage />} />
-                <Route path="/settings/custom-fields" element={<CustomFields />} />
+                
+                {/* SuperAdmin Only */}
+                <Route element={<ProtectedRoute allowedRoles={["super_admin"]} />}>
+                  <Route path="/accounts" element={<Accounts />} />
+                  <Route path="/audit-log" element={<AuditLog />} />
+                  <Route path="/settings/custom-fields" element={<CustomFields />} />
+                </Route>
               </Route>
             </Route>
 

@@ -9,6 +9,13 @@ import {
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 
+type SidebarLink = {
+  to: string;
+  icon: React.ComponentType<any>;
+  label: string;
+  badge?: string;
+};
+
 export default function Sidebar() {
   const { user, activeRole, logout } = useAuth();
   const { allAttendanceToday, leaveRequests } = useData();
@@ -23,18 +30,16 @@ export default function Sidebar() {
     return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
   };
 
-  const initials = getUserInitials(user?.name || user?.username || '');
+  const initials = getUserInitials(user?.username || '');
 
-  const mainLinks = [
+  const hrLinks: SidebarLink[] = [
     { to: '/launchpad', icon: Zap, label: 'Launchpad' },
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/hr/branch-dashboard', icon: Building2, label: 'Branch HR' },
-    { to: '/penalty-workflow', icon: AlertTriangle, label: 'Penalty Flow' },
+    { to: '/hr/branch-dashboard', icon: Building2, label: 'Branch HR Dashboard' },
+    { to: '/attendance-verification', icon: CalendarCheck, label: 'Attendance Verification' },
+    { to: '/attendance-head-review', icon: ShieldCheck, label: 'Head HR Review' },
     { to: '/leave-capacity', icon: CalendarDays, label: 'Leave Capacity' },
-    { to: '/attendance-verification', icon: CalendarCheck, label: 'Attendance Verify' },
-    { to: '/leave-wallet', icon: Wallet, label: 'Leave Wallet' },
-    { to: '/penalty-ledger', icon: ClipboardList, label: 'Penalty Ledger' },
-    { to: '/announcements', icon: Zap, label: 'Announcements' },
+    { to: '/penalty-workflow', icon: AlertTriangle, label: 'Penalty Workflow' },
     { to: '/directory', icon: MapPin, label: 'Directory' },
     { to: '/employees', icon: Users, label: 'Employees' },
     { to: '/attendance', icon: CalendarCheck, label: 'Attendance', badge: '3' },
@@ -42,7 +47,30 @@ export default function Sidebar() {
     { to: '/leave', icon: CalendarDays, label: 'Leave', badge: '3' },
     { to: '/payroll', icon: DollarSign, label: 'Payroll' },
     { to: '/promotions', icon: TrendingUp, label: 'Promotions' },
+    { to: '/leave-wallet', icon: Wallet, label: 'Leave Wallet' },
+    { to: '/penalty-ledger', icon: ClipboardList, label: 'Penalty Ledger' },
+    { to: '/announcements', icon: Zap, label: 'Announcements' },
   ];
+
+  const superAdminLinks: SidebarLink[] = [
+    { to: '/launchpad', icon: Zap, label: 'Launchpad' },
+    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/hr/branch-dashboard', icon: Building2, label: 'Branch HR Dashboard' },
+    { to: '/attendance-head-review', icon: ShieldCheck, label: 'Head HR Review' },
+    { to: '/attendance-report', icon: ClipboardList, label: 'Final Attendance Report' },
+    { to: '/directory', icon: MapPin, label: 'Directory' },
+    { to: '/employees', icon: Users, label: 'Employees' },
+    { to: '/attendance', icon: CalendarCheck, label: 'Attendance', badge: '3' },
+    { to: '/leave', icon: CalendarDays, label: 'Leave', badge: '3' },
+    { to: '/payroll', icon: DollarSign, label: 'Payroll' },
+    { to: '/leave-wallet', icon: Wallet, label: 'Leave Wallet' },
+    { to: '/penalty-ledger', icon: ClipboardList, label: 'Penalty Ledger' },
+    { to: '/announcements', icon: Zap, label: 'Announcements' },
+    { to: '/accounts', icon: ShieldCheck, label: 'HR Accounts' },
+    { to: '/audit-log', icon: ScrollText, label: 'Audit Log' },
+  ];
+
+  const mainLinks = activeRole === 'super_admin' ? superAdminLinks : hrLinks;
 
   const settingsLinks = [
     { to: '/settings/departments', label: 'Departments' },
@@ -130,39 +158,53 @@ export default function Sidebar() {
               style={{ color: isSettingsActive ? '#90caf9' : 'var(--sb-lbl)' }}
             >
               {settingsOpen ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
-              Configuration
+              System Configuration
             </button>
-            {settingsOpen && settingsLinks.map(link => (
-              <NavLink key={link.to} to={link.to} className={({ isActive }) => `nav-a ${isActive ? 'active' : ''}`}>
-                <Settings size={14} className="nav-ico" />
-                {link.label}
-              </NavLink>
-            ))}
+            {settingsOpen && (
+              <>
+                {settingsLinks.map(link => (
+                  <NavLink key={link.to} to={link.to} className={({ isActive }) => `nav-a ${isActive ? 'active' : ''}`}>
+                    <Settings size={14} className="nav-ico" />
+                    {link.label}
+                  </NavLink>
+                ))}
+                <NavLink to="/settings/custom-fields" className={({ isActive }) => `nav-a ${isActive ? 'active' : ''}`}>
+                  <FormInput size={14} className="nav-ico" />
+                  Custom Fields
+                </NavLink>
+              </>
+            )}
           </div>
         </>
       )}
 
-      {activeRole === 'super_admin' && (
-        <>
-          <div className="sb-div" />
-          <div className="sb-sec">
-            <div className="sb-lbl">Administration</div>
-            {adminLinks.map(link => (
-              <NavLink key={link.to} to={link.to} className={({ isActive }) => `nav-a ${isActive ? 'active' : ''}`}>
-                <link.icon size={14} className="nav-ico" />
-                {link.label}
-              </NavLink>
-            ))}
-          </div>
-        </>
-      )}
+      <div className="sb-div" />
+      <div className="sb-sec">
+        <div className="sb-lbl">Workflow Role</div>
+        <div style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--t2)', padding: 12, borderRadius: 12, background: 'rgba(148,163,184,.08)' }}>
+          {activeRole === 'super_admin' && (
+            <>
+              Super Admin oversees all systems: branch data prep, head HR approvals, configurations, and final reports.
+              <br />
+              All HR workflow pages and accounts are visible here for complete oversight.
+            </>
+          )}
+          {activeRole === 'hr' && (
+            <>
+              HR executes the approval workflow: Branch HR locks and prepares data, Head HR reviews and approves/rejects.
+              <br />
+              Super Admin reviews final outcomes.
+            </>
+          )}
+        </div>
+      </div>
 
       <div className="sb-bottom">
         <div className="sb-user">
           <div className="sb-chip" onClick={logout}>
             <div className="sb-av">{initials}</div>
             <div>
-              <div className="sb-un">{user?.name || user?.username}</div>
+              <div className="sb-un">{user?.username}</div>
               <div className="sb-ur">{activeRole}</div>
             </div>
             <LogOut size={14} style={{ marginLeft: 'auto', color: 'rgba(15,23,42,.5)' }} />

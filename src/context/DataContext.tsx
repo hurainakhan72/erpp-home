@@ -39,6 +39,21 @@ function save(key: string, value: any) {
   localStorage.setItem('ems_' + key, JSON.stringify(value));
 }
 
+export type AttendanceLockStatus =
+  | 'unlocked'
+  | 'locked'
+  | 'branch_locked'
+  | 'head_locked'
+  | 'finalized';
+
+export interface AttendanceLock {
+  status: AttendanceLockStatus;
+  lockedBy: string;
+  lockedAt: string;
+  branch?: string;
+  date?: string;
+}
+
 interface DataContextType {
   employees: Employee[];
   setEmployees: (fn: (prev: Employee[]) => Employee[]) => void;
@@ -60,8 +75,8 @@ interface DataContextType {
   setAttendanceData: (fn: (prev: any[]) => any[]) => void;
   allAttendanceToday: any[];
   setAllAttendanceToday: (fn: (prev: any[]) => any[]) => void;
-  attendanceLocks: Record<string, { status: "locked" | "unlocked"; lockedBy: string; lockedAt: string }>;
-  setAttendanceLocks: (fn: (prev: Record<string, { status: "locked" | "unlocked"; lockedBy: string; lockedAt: string }>) => Record<string, { status: "locked" | "unlocked"; lockedBy: string; lockedAt: string }>) => void;
+  attendanceLocks: Record<string, AttendanceLock>;
+  setAttendanceLocks: (fn: (prev: Record<string, AttendanceLock>) => Record<string, AttendanceLock>) => void;
   departments: string[];
   setDepartments: (fn: (prev: string[]) => string[]) => void;
   designations: string[];
@@ -122,7 +137,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [hrAccounts, setHrAccounts] = usePersisted('hrAccounts', defaultHrAccounts);
   const [attendanceData, setAttendanceData] = usePersisted('attendanceData', defaultAttendance);
   const [allAttendanceToday, setAllAttendanceToday] = usePersisted('allAttendanceToday', defaultAttToday);
-  const [attendanceLocks, setAttendanceLocks] = usePersisted<Record<string, { status: "locked" | "unlocked"; lockedBy: string; lockedAt: string }>>('attendanceLocks', {});
+  const [attendanceLocks, setAttendanceLocks] = usePersisted<Record<string, AttendanceLock>>('attendanceLocks', {});
   const [departments, setDepartments] = usePersisted('departments', defaultDepts);
   const [designations, setDesignations] = usePersisted('designations', defaultDesigs);
   const [workModes, setWorkModes] = usePersisted('workModes', defaultWorkModes);
