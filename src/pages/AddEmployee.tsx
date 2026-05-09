@@ -123,7 +123,7 @@ const S = `
   .step-info{font-size:12px;color:#9ca3af;font-weight:500;}
 `;
 
-const STEPS = ['Personal', 'Contact', 'Bank', 'Job Info', 'Salary', 'Medical', 'Attachments', 'Account'];
+const STEPS = ['Employee Info', 'Extra Info', 'Bank', 'Medical', 'Job Info', 'User Creation'];
 
 const STEP_COLORS = [
   '#6366f1','#ec4899','#f97316','#14b8a6','#10b981','#a855f7','#06b6d4','#8b5cf6'
@@ -231,15 +231,15 @@ export default function AddEmployee() {
   // ── Step colors for section badge ──
   const stepColor = STEP_COLORS[step];
 
-  // ── renderStep (logic identical, just CSS classes swapped) ─────────────────
+  // ── renderStep (restructured to match backend 6-step workflow) ─────────────────
   const renderStep = () => {
     switch (step) {
       case 0: return (
         <div className={direction === 'right' ? 'step-slide-r' : 'step-slide-l'}>
           <div className="form-sec-head">
             <span style={{ fontSize: 18 }}>👤</span>
-            <span className="form-sec-title">Personal Information</span>
-            <span className="form-sec-badge" style={{ background: '#eff6ff', color: '#6366f1', marginLeft: 'auto' }}>Step 1 of 8</span>
+            <span className="form-sec-title">Employee Information</span>
+            <span className="form-sec-badge" style={{ background: '#eff6ff', color: '#6366f1', marginLeft: 'auto' }}>Step 1 of 6</span>
           </div>
           <div className="add-form-row-3">
             <div className="add-form-group">
@@ -283,8 +283,8 @@ export default function AddEmployee() {
         <div className={direction === 'right' ? 'step-slide-r' : 'step-slide-l'}>
           <div className="form-sec-head">
             <span style={{ fontSize: 18 }}>📞</span>
-            <span className="form-sec-title">Contact Information</span>
-            <span className="form-sec-badge" style={{ background: '#fdf2f8', color: '#db2777', marginLeft: 'auto' }}>Step 2 of 8</span>
+            <span className="form-sec-title">Extra Information</span>
+            <span className="form-sec-badge" style={{ background: '#fdf2f8', color: '#db2777', marginLeft: 'auto' }}>Step 2 of 6</span>
           </div>
           <div className="add-form-row">
             <div className="add-form-group"><label className="add-label">Contact 1 *</label><input className="add-input" value={contact1} onChange={e => handleNumberChange(e.target.value, setContact1)} /></div>
@@ -314,7 +314,7 @@ export default function AddEmployee() {
           <div className="form-sec-head">
             <span style={{ fontSize: 18 }}>🏦</span>
             <span className="form-sec-title">Bank Details</span>
-            <span className="form-sec-badge" style={{ background: '#fff7ed', color: '#c2410c', marginLeft: 'auto' }}>Step 3 of 8</span>
+            <span className="form-sec-badge" style={{ background: '#fff7ed', color: '#c2410c', marginLeft: 'auto' }}>Step 3 of 6</span>
           </div>
           <div className="add-form-row">
             <div className="add-form-group">
@@ -338,9 +338,42 @@ export default function AddEmployee() {
       case 3: return (
         <div className={direction === 'right' ? 'step-slide-r' : 'step-slide-l'}>
           <div className="form-sec-head">
+            <span style={{ fontSize: 18 }}>🩺</span>
+            <span className="form-sec-title">Medical Information</span>
+            <span className="form-sec-badge" style={{ background: '#fdf4ff', color: '#a21caf', marginLeft: 'auto' }}>Step 4 of 6</span>
+          </div>
+          <div className="add-form-row">
+            <div className="add-form-group">
+              <label className="add-label">Blood Group</label>
+              <select className="add-select" value={bloodGroup} onChange={e => setBloodGroup(e.target.value)}>
+                <option value="">Select</option>
+                {['A+','A-','B+','B-','AB+','AB-','O+','O-'].map(b => <option key={b}>{b}</option>)}
+              </select>
+            </div>
+            <div className="add-form-group">
+              <label className="add-label">Allergies</label>
+              <textarea className="add-textarea" rows={2} placeholder="No numbers allowed" value={allergies} onChange={e => handleTextChange(e.target.value, setAllergies)} />
+            </div>
+          </div>
+          <div className="add-form-row">
+            <div className="add-form-group">
+              <label className="add-label">Chronic Conditions</label>
+              <textarea className="add-textarea" rows={2} placeholder="No numbers allowed" value={chronic} onChange={e => handleTextChange(e.target.value, setChronic)} />
+            </div>
+            <div className="add-form-group">
+              <label className="add-label">Medications</label>
+              <textarea className="add-textarea" rows={2} placeholder="No numbers allowed" value={medications} onChange={e => handleTextChange(e.target.value, setMedications)} />
+            </div>
+          </div>
+        </div>
+      );
+
+      case 4: return (
+        <div className={direction === 'right' ? 'step-slide-r' : 'step-slide-l'}>
+          <div className="form-sec-head">
             <span style={{ fontSize: 18 }}>💼</span>
             <span className="form-sec-title">Job Information</span>
-            <span className="form-sec-badge" style={{ background: '#f0fdf4', color: '#15803d', marginLeft: 'auto' }}>Step 4 of 8</span>
+            <span className="form-sec-badge" style={{ background: '#f0fdf4', color: '#15803d', marginLeft: 'auto' }}>Step 5 of 6</span>
           </div>
           <div className="add-form-row-3">
             <div className="add-form-group"><label className="add-label">Department *</label><select className="add-select" value={dept} onChange={e => setDept(e.target.value)}>{departments.map((d: string) => <option key={d}>{d}</option>)}</select></div>
@@ -368,111 +401,35 @@ export default function AddEmployee() {
               </div>
             </div>
           </div>
-        </div>
-      );
 
-      case 4: return (
-        <div className={direction === 'right' ? 'step-slide-r' : 'step-slide-l'}>
-          <div className="form-sec-head">
-            <span style={{ fontSize: 18 }}>💰</span>
-            <span className="form-sec-title">Salary Structure</span>
-            <span className="form-sec-badge" style={{ background: '#f0fdf4', color: '#166534', marginLeft: 'auto' }}>Step 5 of 8</span>
+          {/* Salary Structure Section */}
+          <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid #f1f5f9' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#1e1b4b', marginBottom: 16 }}>💰 Salary Structure</div>
+            <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 12 }}>Salary components are configurable from Settings → Payroll Components</div>
+            <table className="sal-table">
+              <thead><tr><th>Component</th><th>Monthly Amount (PKR)</th><th>Include</th></tr></thead>
+              <tbody>
+                <tr><td>Basic Salary</td><td><input className="add-input mono" type="number" value={salBasic || ''} onChange={e => setSalBasic(+e.target.value)} style={{ width: 160 }} /></td><td><input type="checkbox" defaultChecked /></td></tr>
+                <tr><td>House Rent</td><td><input className="add-input mono" type="number" value={salHouse || ''} onChange={e => setSalHouse(+e.target.value)} style={{ width: 160 }} /></td><td><input type="checkbox" defaultChecked /></td></tr>
+                <tr><td>Medical</td><td><input className="add-input mono" type="number" value={salMedical || ''} onChange={e => setSalMedical(+e.target.value)} style={{ width: 160 }} /></td><td><input type="checkbox" defaultChecked /></td></tr>
+                <tr><td>Conveyance</td><td><input className="add-input mono" type="number" value={salConveyance || ''} onChange={e => setSalConveyance(+e.target.value)} style={{ width: 160 }} /></td><td><input type="checkbox" defaultChecked /></td></tr>
+                {commissionEligible && <tr><td>Commission</td><td><input className="add-input mono" type="number" value={salCommission || ''} onChange={e => setSalCommission(+e.target.value)} style={{ width: 160 }} /></td><td><input type="checkbox" defaultChecked /></td></tr>}
+              </tbody>
+            </table>
+            <div className="sal-total-box">
+              <span className="sal-total-label">Total Monthly Package</span>
+              <span className="sal-total-val">{formatPKR(totalSalary)}</span>
+            </div>
           </div>
-          <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 12 }}>Salary components are configurable from Settings → Payroll Components</div>
-          <table className="sal-table">
-            <thead><tr><th>Component</th><th>Monthly Amount (PKR)</th><th>Include</th></tr></thead>
-            <tbody>
-              <tr><td>Basic Salary</td><td><input className="add-input mono" type="number" value={salBasic || ''} onChange={e => setSalBasic(+e.target.value)} style={{ width: 160 }} /></td><td><input type="checkbox" defaultChecked /></td></tr>
-              <tr><td>House Rent</td><td><input className="add-input mono" type="number" value={salHouse || ''} onChange={e => setSalHouse(+e.target.value)} style={{ width: 160 }} /></td><td><input type="checkbox" defaultChecked /></td></tr>
-              <tr><td>Medical</td><td><input className="add-input mono" type="number" value={salMedical || ''} onChange={e => setSalMedical(+e.target.value)} style={{ width: 160 }} /></td><td><input type="checkbox" defaultChecked /></td></tr>
-              <tr><td>Conveyance</td><td><input className="add-input mono" type="number" value={salConveyance || ''} onChange={e => setSalConveyance(+e.target.value)} style={{ width: 160 }} /></td><td><input type="checkbox" defaultChecked /></td></tr>
-              {commissionEligible && <tr><td>Commission</td><td><input className="add-input mono" type="number" value={salCommission || ''} onChange={e => setSalCommission(+e.target.value)} style={{ width: 160 }} /></td><td><input type="checkbox" defaultChecked /></td></tr>}
-            </tbody>
-          </table>
-          <div className="sal-total-box">
-            <span className="sal-total-label">Total Monthly Package</span>
-            <span className="sal-total-val">{formatPKR(totalSalary)}</span>
-          </div>
-          <div style={{ marginTop: 12 }}><DecisionBanner>DECISION NEEDED — Salary Components: Same for all or per person? Confirm in meeting.</DecisionBanner></div>
         </div>
       );
 
       case 5: return (
         <div className={direction === 'right' ? 'step-slide-r' : 'step-slide-l'}>
           <div className="form-sec-head">
-            <span style={{ fontSize: 18 }}>🩺</span>
-            <span className="form-sec-title">Medical Information</span>
-            <span className="form-sec-badge" style={{ background: '#fdf4ff', color: '#a21caf', marginLeft: 'auto' }}>Step 6 of 8</span>
-          </div>
-          <div className="add-form-row">
-            <div className="add-form-group">
-              <label className="add-label">Blood Group</label>
-              <select className="add-select" value={bloodGroup} onChange={e => setBloodGroup(e.target.value)}>
-                <option value="">Select</option>
-                {['A+','A-','B+','B-','AB+','AB-','O+','O-'].map(b => <option key={b}>{b}</option>)}
-              </select>
-            </div>
-            <div className="add-form-group">
-              <label className="add-label">Allergies</label>
-              <textarea className="add-textarea" rows={2} placeholder="No numbers allowed" value={allergies} onChange={e => handleTextChange(e.target.value, setAllergies)} />
-            </div>
-          </div>
-          <div className="add-form-row">
-            <div className="add-form-group">
-              <label className="add-label">Chronic Conditions</label>
-              <textarea className="add-textarea" rows={2} placeholder="No numbers allowed" value={chronic} onChange={e => handleTextChange(e.target.value, setChronic)} />
-            </div>
-            <div className="add-form-group">
-              <label className="add-label">Medications</label>
-              <textarea className="add-textarea" rows={2} placeholder="No numbers allowed" value={medications} onChange={e => handleTextChange(e.target.value, setMedications)} />
-            </div>
-          </div>
-          <div style={{ marginTop: 12 }}><DecisionBanner>DECISION NEEDED — Can employees edit their own medical info? Confirm in meeting.</DecisionBanner></div>
-        </div>
-      );
-
-      case 6: return (
-        <div className={direction === 'right' ? 'step-slide-r' : 'step-slide-l'}>
-          <div className="form-sec-head">
-            <span style={{ fontSize: 18 }}>📎</span>
-            <span className="form-sec-title">Attachments</span>
-            <span className="form-sec-badge" style={{ background: '#f0f9ff', color: '#0369a1', marginLeft: 'auto' }}>Step 7 of 8</span>
-          </div>
-          <input type="file" id="file-upload" style={{ display: 'none' }} onChange={(e) => alert('File Selected: ' + e.target.files?.[0].name)} />
-          {[
-            { label: 'CNIC Copy', status: 'uploaded', file: 'cnic_scan.pdf' },
-            { label: 'Profile Photo', status: 'uploaded', file: 'photo.jpg' },
-            { label: 'Electric Bill', status: 'missing' },
-            { label: 'Employment Contract', status: 'missing' },
-          ].map((att, i) => (
-            <div key={i} className="att-row">
-              <FileText size={16} color="#9ca3af" />
-              <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: '#1e1b4b' }}>{att.label}</span>
-              {att.status === 'uploaded' ? (
-                <>
-                  <span className="att-pill-green">✓ Uploaded — {att.file}</span>
-                  <button className="att-btn" onClick={() => window.open('#', '_blank')}>View</button>
-                </>
-              ) : (
-                <>
-                  <span className="att-pill-amber">⚠ Missing</span>
-                  <button className="att-btn" onClick={() => document.getElementById('file-upload')?.click()}>
-                    <Upload size={11} /> Upload
-                  </button>
-                </>
-              )}
-            </div>
-          ))}
-          <div style={{ marginTop: 12 }}><DecisionBanner>DECISION NEEDED — Which attachments are mandatory? Confirm in meeting.</DecisionBanner></div>
-        </div>
-      );
-
-      case 7: return (
-        <div className={direction === 'right' ? 'step-slide-r' : 'step-slide-l'}>
-          <div className="form-sec-head">
             <span style={{ fontSize: 18 }}>🔐</span>
-            <span className="form-sec-title">Account Setup</span>
-            <span className="form-sec-badge" style={{ background: '#f5f3ff', color: '#7c3aed', marginLeft: 'auto' }}>Step 8 of 8</span>
+            <span className="form-sec-title">User Creation</span>
+            <span className="form-sec-badge" style={{ background: '#f5f3ff', color: '#7c3aed', marginLeft: 'auto' }}>Step 6 of 6</span>
           </div>
           <div className="acc-toggle">
             <button className={accountMethod === 'A' ? 'active' : 'idle'} onClick={() => setAccountMethod('A')}>HR Creates Credentials</button>
@@ -498,6 +455,36 @@ export default function AddEmployee() {
               <div style={{ fontSize: 11, color: '#9ca3af' }}>Employee will receive a link and set their own password.</div>
             </div>
           )}
+
+          {/* Attachments Section */}
+          <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid #f1f5f9' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#1e1b4b', marginBottom: 16 }}>📎 Required Attachments</div>
+            <input type="file" id="file-upload" style={{ display: 'none' }} onChange={(e) => alert('File Selected: ' + e.target.files?.[0].name)} />
+            {[
+              { label: 'CNIC Copy', status: 'uploaded', file: 'cnic_scan.pdf' },
+              { label: 'Profile Photo', status: 'uploaded', file: 'photo.jpg' },
+              { label: 'Employment Contract', status: 'missing' },
+            ].map((att, i) => (
+              <div key={i} className="att-row">
+                <FileText size={16} color="#9ca3af" />
+                <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: '#1e1b4b' }}>{att.label}</span>
+                {att.status === 'uploaded' ? (
+                  <>
+                    <span className="att-pill-green">✓ Uploaded — {att.file}</span>
+                    <button className="att-btn" onClick={() => window.open('#', '_blank')}>View</button>
+                  </>
+                ) : (
+                  <>
+                    <span className="att-pill-amber">⚠ Missing</span>
+                    <button className="att-btn" onClick={() => document.getElementById('file-upload')?.click()}>
+                      <Upload size={11} /> Upload
+                    </button>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+
           {fullName && (
             <div className="summary-box">
               <strong style={{ color: '#1e1b4b' }}>{fullName}</strong>
@@ -506,7 +493,6 @@ export default function AddEmployee() {
               {doj && <span style={{ color: '#9ca3af' }}> · Joining: {doj}</span>}
             </div>
           )}
-          <div style={{ marginTop: 12 }}><DecisionBanner>DECISION NEEDED — Account creation method: A or B? Confirm in meeting.</DecisionBanner></div>
         </div>
       );
 

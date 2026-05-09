@@ -25,6 +25,8 @@ import AuditLog from "./pages/AuditLog";
 import BranchHRDashboard from "./pages/BranchHRDashboard";
 import HeadOfficeHR from "./pages/HeadOfficeHR";
 import AttendanceReport from "./pages/AttendanceReport";
+import OverviewPage from "./pages/Overview";
+import SavedReports from "./pages/SavedReports";
 import PenaltyWorkflow from "./pages/PenaltyWorkflow";
 import LeaveCapacity from "./pages/LeaveCapacity";
 import AttendanceVerification from "./pages/AttendanceVerification";
@@ -33,6 +35,7 @@ import PenaltyLedger from "./pages/PenaltyLedger";
 import AnnouncementsFeed from "./pages/AnnouncementsFeed";
 import Directory from "./pages/Directory";
 import EmployeeWidgets from "./pages/EmployeeWidgets";
+import Calendar from "./pages/Calendar";
 
 // Employee Specific Pages
 import MyDashboard from "./pages/MyDashboard";
@@ -122,11 +125,14 @@ const App = () => (
                 <Route path="/leave-wallet" element={<LeaveWalletHistory />} />
                 <Route path="/penalty-ledger" element={<PenaltyLedger />} />
                 <Route path="/announcements" element={<AnnouncementsFeed />} />
+                <Route path="/calendar" element={<Calendar />} />
                 
                 {/* HR Workflow Pages: Branch HR executes, SuperAdmin watches */}
                 <Route path="/hr/branch-dashboard" element={<BranchHRDashboard />} />
                 <Route path="/attendance-verification" element={<AttendanceVerification />} />
                 <Route path="/attendance-head-review" element={<HeadOfficeHR />} />
+                <Route path="/overview" element={<OverviewPage />} />
+                <Route path="/saved-reports" element={<SavedReports />} />
                 <Route path="/leave-capacity" element={<LeaveCapacity />} />
                 <Route path="/penalty-workflow" element={<PenaltyWorkflow />} />
                 

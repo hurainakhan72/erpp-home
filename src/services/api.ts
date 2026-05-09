@@ -124,21 +124,25 @@ export const dutyRosterTemplates: DutyRosterTemplate[] = [
 ];
 
 export const attendanceData = [
-  { date: '2026-03-19', day: 'Wed', empId: 'EMP001', name: 'Ahmed Ali', dept: 'Engineering', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '09:02', checkOut: '18:05', status: 'Present', lateBy: '', notes: '' },
-  { date: '2026-03-18', day: 'Tue', empId: 'EMP001', name: 'Ahmed Ali', dept: 'Engineering', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '09:18', checkOut: '18:10', status: 'Late', lateBy: '18 min', notes: 'Traffic' },
-  { date: '2026-03-17', day: 'Mon', empId: 'EMP001', name: 'Ahmed Ali', dept: 'Engineering', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '08:58', checkOut: '18:00', status: 'Present', lateBy: '', notes: '' },
-  { date: '2026-03-14', day: 'Fri', empId: 'EMP001', name: 'Ahmed Ali', dept: 'Engineering', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '09:05', checkOut: '17:58', status: 'Present', lateBy: '', notes: '' },
-  { date: '2026-03-13', day: 'Thu', empId: 'EMP001', name: 'Ahmed Ali', dept: 'Engineering', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '-', checkOut: '-', status: 'Absent', lateBy: '', notes: '' },
-  { date: '2026-03-12', day: 'Wed', empId: 'EMP001', name: 'Ahmed Ali', dept: 'Engineering', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '09:00', checkOut: '18:02', status: 'Present', lateBy: '', notes: '' },
-  { date: '2026-03-11', day: 'Tue', empId: 'EMP001', name: 'Ahmed Ali', dept: 'Engineering', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '09:03', checkOut: '18:00', status: 'Present', lateBy: '', notes: '' },
+  { date: '2026-03-19', day: 'Wed', empId: 'EMP001', name: 'Ahmed Ali', dept: 'Engineering', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '09:02', checkOut: '18:05', status: 'Present', lateBy: '', notes: '', state: 'acknowledged', markedBy: 'HR1', markedAt: '2026-03-19T09:30:00Z', submittedAt: '2026-03-19T18:00:00Z', acknowledgedAt: '2026-03-19T18:15:00Z' },
+  { date: '2026-03-18', day: 'Tue', empId: 'EMP001', name: 'Ahmed Ali', dept: 'Engineering', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '09:18', checkOut: '18:10', status: 'Late', lateBy: '18 min', notes: 'Traffic', state: 'acknowledged', markedBy: 'HR1', markedAt: '2026-03-18T09:30:00Z', submittedAt: '2026-03-18T18:00:00Z', acknowledgedAt: '2026-03-18T18:10:00Z' },
+  { date: '2026-03-17', day: 'Mon', empId: 'EMP001', name: 'Ahmed Ali', dept: 'Engineering', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '08:58', checkOut: '18:00', status: 'Present', lateBy: '', notes: '', state: 'acknowledged', markedBy: 'HR1', markedAt: '2026-03-17T09:30:00Z', submittedAt: '2026-03-17T18:00:00Z', acknowledgedAt: '2026-03-17T18:05:00Z' },
+  { date: '2026-03-14', day: 'Fri', empId: 'EMP001', name: 'Ahmed Ali', dept: 'Engineering', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '09:05', checkOut: '17:58', status: 'Present', lateBy: '', notes: '', state: 'acknowledged', markedBy: 'HR1', markedAt: '2026-03-14T09:30:00Z', submittedAt: '2026-03-14T18:00:00Z', acknowledgedAt: '2026-03-14T18:02:00Z' },
+  { date: '2026-03-13', day: 'Thu', empId: 'EMP001', name: 'Ahmed Ali', dept: 'Engineering', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '-', checkOut: '-', status: 'Absent', lateBy: '', notes: '', state: 'acknowledged', markedBy: 'HR1', markedAt: '2026-03-13T09:30:00Z', submittedAt: '2026-03-13T18:00:00Z', acknowledgedAt: '2026-03-13T18:05:00Z' },
+  { date: '2026-03-12', day: 'Wed', empId: 'EMP001', name: 'Ahmed Ali', dept: 'Engineering', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '09:00', checkOut: '18:02', status: 'Present', lateBy: '', notes: '', state: 'acknowledged', markedBy: 'HR1', markedAt: '2026-03-12T09:30:00Z', submittedAt: '2026-03-12T18:00:00Z', acknowledgedAt: '2026-03-12T18:03:00Z' },
+  { date: '2026-03-11', day: 'Tue', empId: 'EMP001', name: 'Ahmed Ali', dept: 'Engineering', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '09:03', checkOut: '18:00', status: 'Present', lateBy: '', notes: '', state: 'acknowledged', markedBy: 'HR1', markedAt: '2026-03-11T09:30:00Z', submittedAt: '2026-03-11T18:00:00Z', acknowledgedAt: '2026-03-11T18:02:00Z' },
+  // Add some records in different states for demonstration
+  { date: '2026-05-09', day: 'Fri', empId: 'EMP001', name: 'Ahmed Ali', dept: 'Engineering', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '09:05', checkOut: '18:00', status: 'Present', lateBy: '', notes: '', state: 'draft', markedBy: 'HR1', markedAt: '2026-05-09T09:30:00Z', submittedAt: null, acknowledgedAt: null },
+  { date: '2026-05-08', day: 'Thu', empId: 'EMP001', name: 'Ahmed Ali', dept: 'Engineering', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '09:10', checkOut: '18:05', status: 'Late', lateBy: '10 min', notes: '', state: 'saved', markedBy: 'HR1', markedAt: '2026-05-08T09:30:00Z', submittedAt: null, acknowledgedAt: null },
+  { date: '2026-05-07', day: 'Wed', empId: 'EMP001', name: 'Ahmed Ali', dept: 'Engineering', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '09:00', checkOut: '18:00', status: 'Present', lateBy: '', notes: '', state: 'submitted', markedBy: 'HR1', markedAt: '2026-05-07T09:30:00Z', submittedAt: '2026-05-07T18:00:00Z', acknowledgedAt: null },
 ];
 
 export const allAttendanceToday = [
-  { empId: 'EMP001', name: 'Ahmed Ali', dept: 'Engineering', branch: 'Head Office', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '09:02', checkOut: '18:05', status: 'Present', lateBy: '', notes: '' },
-  { empId: 'EMP002', name: 'Sara Khan', dept: 'Marketing', branch: 'Head Office', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '08:55', checkOut: '18:00', status: 'Present', lateBy: '', notes: '' },
-  { empId: 'EMP003', name: 'Usman Malik', dept: 'HR', branch: 'Head Office', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '09:22', checkOut: '18:10', status: 'Late', lateBy: '22 min', notes: '' },
-  { empId: 'EMP004', name: 'Fatima Raza', dept: 'Sales', branch: 'Branch B', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '-', checkOut: '-', status: 'On Leave', lateBy: '', notes: 'Annual Leave' },
-  { empId: 'EMP005', name: 'Bilal Ahmed', dept: 'Finance', branch: 'Branch B', shift: 'Night Shift', expectedIn: '22:00', checkIn: '-', checkOut: '-', status: 'Absent', lateBy: '', notes: '' },
+  { empId: 'EMP001', name: 'Ahmed Ali', dept: 'Engineering', branch: 'Head Office', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '09:02', checkOut: '18:05', status: 'Present', lateBy: '', notes: '', state: 'submitted', markedBy: 'HR1', markedAt: '2026-05-09T09:30:00Z', submittedAt: '2026-05-09T18:00:00Z', acknowledgedAt: null },
+  { empId: 'EMP002', name: 'Sara Khan', dept: 'Marketing', branch: 'Head Office', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '08:55', checkOut: '18:00', status: 'Present', lateBy: '', notes: '', state: 'submitted', markedBy: 'HR1', markedAt: '2026-05-09T09:30:00Z', submittedAt: '2026-05-09T18:00:00Z', acknowledgedAt: null },
+  { empId: 'EMP003', name: 'Usman Malik', dept: 'HR', branch: 'Head Office', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '09:22', checkOut: '18:10', status: 'Late', lateBy: '22 min', notes: '', state: 'submitted', markedBy: 'HR1', markedAt: '2026-05-09T09:30:00Z', submittedAt: '2026-05-09T18:00:00Z', acknowledgedAt: null },
+  { empId: 'EMP004', name: 'Fatima Raza', dept: 'Sales', branch: 'Branch B', shift: 'Morning Shift', expectedIn: '09:00', checkIn: '-', checkOut: '-', status: 'On Leave', lateBy: '', notes: 'Annual Leave', state: 'submitted', markedBy: 'HR1', markedAt: '2026-05-09T09:30:00Z', submittedAt: '2026-05-09T18:00:00Z', acknowledgedAt: null },
+  { empId: 'EMP005', name: 'Bilal Ahmed', dept: 'Finance', branch: 'Branch B', shift: 'Night Shift', expectedIn: '22:00', checkIn: '-', checkOut: '-', status: 'Absent', lateBy: '', notes: '', state: 'submitted', markedBy: 'HR1', markedAt: '2026-05-09T09:30:00Z', submittedAt: '2026-05-09T18:00:00Z', acknowledgedAt: null },
 ];
 
 export const leaveRequests = [
@@ -167,7 +171,9 @@ export const promotions = [
 ];
 
 export const penalties = [
-  { id: 'PN001', empId: 'EMP003', empName: 'Usman Malik', type: 'Late 3+ days', amount: 2000, date: '2026-02-28', appliedBy: 'HR1', status: 'Active' },
+  { id: 'PN001', empId: 'EMP003', empName: 'Usman Malik', branch: 'Head Office', type: 'Late 3+ days', amount: 2000, date: '2026-02-28', appliedBy: 'HR1', status: 'Active', workflowStatus: 'branch_pending' },
+  { id: 'PN002', empId: 'EMP004', empName: 'Fatima Raza', branch: 'Branch B', type: 'Policy breach', amount: 1500, date: '2026-04-12', appliedBy: 'Branch Manager', status: 'Active', workflowStatus: 'ho_pending' },
+  { id: 'PN003', empId: 'EMP005', empName: 'Bilal Ahmed', branch: 'Branch B', type: 'Unapproved absence', amount: 1800, date: '2026-04-20', appliedBy: 'HR1', status: 'Active', workflowStatus: 'approved' },
 ];
 
 export const payrollMonthly = [

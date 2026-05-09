@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { formatPKR } from '../services/api';
-import { Plus, Calendar as CalendarIcon, Filter, TrendingUp, Award, Users, DollarSign, ChevronUp } from 'lucide-react';
+import { Plus, Calendar as CalendarIcon, Filter, TrendingUp, Award, Users, DollarSign, ChevronUp, History, Briefcase, Clock } from 'lucide-react';
 import Modal from '../components/common/Modal';
 import { useToastContext } from '../context/ToastContext';
 
@@ -71,6 +71,52 @@ export default function Promotions() {
   const [modal, setModal] = useState(false);
   const { showToast } = useToastContext();
 
+  // Job History state
+  const [jobHistory, setJobHistory] = useState([
+    {
+      id: 'JH001',
+      empId: 'EMP001',
+      empName: 'John Doe',
+      changeType: 'promotion',
+      oldDesignation: 'Junior Developer',
+      newDesignation: 'Senior Developer',
+      oldSalary: 50000,
+      newSalary: 75000,
+      changeDate: '2024-01-15',
+      effectiveDate: '2024-02-01',
+      approvedBy: 'Super Admin',
+      notes: 'Excellent performance in Q4 projects'
+    },
+    {
+      id: 'JH002',
+      empId: 'EMP002',
+      empName: 'Jane Smith',
+      changeType: 'promotion',
+      oldDesignation: 'Marketing Executive',
+      newDesignation: 'Marketing Manager',
+      oldSalary: 45000,
+      newSalary: 65000,
+      changeDate: '2024-01-20',
+      effectiveDate: '2024-02-01',
+      approvedBy: 'Super Admin',
+      notes: 'Led successful campaign launch'
+    },
+    {
+      id: 'JH003',
+      empId: 'EMP001',
+      empName: 'John Doe',
+      changeType: 'salary_adjustment',
+      oldDesignation: 'Senior Developer',
+      newDesignation: 'Senior Developer',
+      oldSalary: 75000,
+      newSalary: 80000,
+      changeDate: '2024-02-15',
+      effectiveDate: '2024-03-01',
+      approvedBy: 'HR Manager',
+      notes: 'Annual salary review'
+    }
+  ]);
+
   // Modal form states — unchanged
   const [empId,     setEmpId]     = useState('EMP001');
   const [promoDate, setPromoDate] = useState(new Date().toISOString().split('T')[0]);
@@ -117,6 +163,24 @@ export default function Promotions() {
       approvedBy:     'Super Admin',
     };
     setPromotions((prev: any) => [...prev, newRecord]);
+
+    // Auto-insert into job history (employee_job_history table)
+    const historyRecord = {
+      id: 'JH' + String(jobHistory.length + 1).padStart(3, '0'),
+      empId,
+      empName: emp?.name || '',
+      changeType: 'promotion',
+      oldDesignation: emp?.designation || '',
+      newDesignation: newDesig,
+      oldSalary: emp?.salary.basic || 0,
+      newSalary: nSalary,
+      changeDate: promoDate,
+      effectiveDate: promoDate,
+      approvedBy: 'Super Admin',
+      notes: notes || 'Promotion recorded'
+    };
+    setJobHistory((prev: any) => [...prev, historyRecord]);
+
     if (setEmployees) {
       setEmployees((prevEmps: any) => prevEmps.map((e: any) =>
         e.id === empId ? { ...e, designation: newDesig, salary: { ...e.salary, basic: nSalary } } : e
@@ -306,7 +370,121 @@ export default function Promotions() {
           </div>
         </div>
 
-        {/* ── Modal — logic zero touch, only styled ── */}
+        {/* ── Job History Section ── */}
+        <div className="pr-card" style={{marginTop:20}}>
+          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16}}>
+            <History size={18} color="#6366f1"/>
+            <h2 style={{margin:0,fontSize:18,fontWeight:700,color:'#1e1b4b'}}>Employee Job History</h2>
+            <span style={{fontSize:11,color:'#9ca3af',marginLeft:'auto'}}>{jobHistory.length} record{jobHistory.length!==1?'s':''}</span>
+          </div>
+
+          <div style={{overflowX:'auto'}}>
+            <table className="pr-table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Change Type</th>
+                  <th>Old Position</th>
+                  <th>New Position</th>
+                  <th>Salary Change</th>
+                  <th>Change Date</th>
+                  <th>Effective Date</th>
+                  <th>Approved By</th>
+                </tr>
+              </thead>
+              <tbody>
+                {jobHistory.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} style={{textAlign:'center',padding:'48px 20px'}}>
+                      <div style={{fontSize:28,marginBottom:8}}>📋</div>
+                      <div style={{fontSize:13,fontWeight:600,color:'#374151',marginBottom:4}}>No job history records</div>
+                      <div style={{fontSize:11,color:'#9ca3af'}}>Job history will be automatically recorded when promotions are made</div>
+                    </td>
+                  </tr>
+                ) : jobHistory.map((h: any, i: number) => {
+                  const { diff, pct } = salaryDelta(h.oldSalary, h.newSalary);
+                  return (
+                    <tr key={i}>
+                      {/* Employee */}
+                      <td>
+                        <div style={{display:'flex',alignItems:'center',gap:10}}>
+                          <div className="pr-av" style={{background:avGrad(h.empName)}}>
+                            {getInitials(h.empName)}
+                          </div>
+                          <div>
+                            <div style={{fontWeight:700,color:'#1e1b4b',fontSize:12}}>{h.empName}</div>
+                            <div style={{fontSize:9,color:'#9ca3af',marginTop:1}}>{h.empId}</div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Change Type */}
+                      <td>
+                        <span className="pr-chip" style={{
+                          background: h.changeType === 'promotion' ? '#eff6ff' : '#f0fdf4',
+                          color: h.changeType === 'promotion' ? '#1d4ed8' : '#166534'
+                        }}>
+                          {h.changeType === 'promotion' ? '🏆 Promotion' : '💰 Salary Adjustment'}
+                        </span>
+                      </td>
+
+                      {/* Old Position */}
+                      <td>
+                        <div>
+                          <div style={{fontSize:11,color:'#6b7280',fontWeight:500}}>{h.oldDesignation}</div>
+                          <div style={{fontSize:10,color:'#9ca3af',fontFamily:'monospace'}}>{formatPKR(h.oldSalary)}</div>
+                        </div>
+                      </td>
+
+                      {/* New Position */}
+                      <td>
+                        <div>
+                          <div style={{fontSize:11,color:'#6366f1',fontWeight:700}}>{h.newDesignation}</div>
+                          <div style={{fontSize:10,color:'#10b981',fontFamily:'monospace',fontWeight:600}}>{formatPKR(h.newSalary)}</div>
+                        </div>
+                      </td>
+
+                      {/* Salary Change */}
+                      <td>
+                        {h.oldSalary !== h.newSalary ? (
+                          <span className="pr-chip" style={{background:'#dcfce7',color:'#166534'}}>
+                            {diff > 0 ? '↑' : '↓'} {Math.abs(pct)}%
+                          </span>
+                        ) : (
+                          <span style={{fontSize:10,color:'#9ca3af'}}>No change</span>
+                        )}
+                      </td>
+
+                      {/* Change Date */}
+                      <td>
+                        <span style={{fontFamily:'monospace',fontSize:11,color:'#6b7280',background:'#f8fafc',padding:'3px 8px',borderRadius:7}}>
+                          {h.changeDate}
+                        </span>
+                      </td>
+
+                      {/* Effective Date */}
+                      <td>
+                        <span style={{fontFamily:'monospace',fontSize:11,color:'#374151',background:'#eff6ff',padding:'3px 8px',borderRadius:7}}>
+                          {h.effectiveDate}
+                        </span>
+                      </td>
+
+                      {/* Approved By */}
+                      <td>
+                        <div style={{display:'flex',alignItems:'center',gap:6}}>
+                          <div style={{width:20,height:20,borderRadius:6,background:'linear-gradient(135deg,#6366f1,#8b5cf6)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:7,color:'#fff',fontWeight:700}}>
+                            {getInitials(h.approvedBy)}
+                          </div>
+                          <span style={{fontSize:11,color:'#374151'}}>{h.approvedBy}</span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
         <Modal
           open={modal}
           onClose={() => setModal(false)}

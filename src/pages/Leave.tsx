@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { getStatusColor } from '../services/api';
 import { getVisibleEmployees } from '../utils/utils';
-import { Plus, Check, X, Pencil, RotateCcw, CalendarDays, Users, Clock, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Plus, Check, X, Pencil, RotateCcw, CalendarDays, Users, Clock, ThumbsUp, ThumbsDown, AlertTriangle, Shield } from 'lucide-react';
 import Modal from '../components/common/Modal';
 import DecisionBanner from '../components/common/DecisionBanner';
 import { useToastContext } from '../context/ToastContext';
@@ -67,6 +67,99 @@ export default function Leave() {
   const [earlyDate, setEarlyDate] = useState('');
   const [calDeptFilter, setCalDeptFilter] = useState('');
 
+  // ── Leave Capacity & Policy Enforcement ───────────────────────────────
+  const leaveCapacityConfig = useMemo(() => ({
+    // Department-wise max % leave allowed at a time
+    'IT': { maxConcurrentPercent: 30, maxDaysPerMonth: 5 },
+    'HR': { maxConcurrentPercent: 25, maxDaysPerMonth: 4 },
+    'Finance': { maxConcurrentPercent: 20, maxDaysPerMonth: 3 },
+    'Operations': { maxConcurrentPercent: 35, maxDaysPerMonth: 6 },
+    'Sales': { maxConcurrentPercent: 40, maxDaysPerMonth: 8 },
+    'Marketing': { maxConcurrentPercent: 35, maxDaysPerMonth: 6 },
+    'default': { maxConcurrentPercent: 25, maxDaysPerMonth: 4 }
+  }), []);
+
+  // Check for overlapping leaves
+  const checkOverlap = (empId: string, fromDate: string, toDate: string, excludeId?: string): boolean => {
+    const empLeaves = data.filter((l: any) =>
+      l.empId === empId &&
+      l.status === 'Approved' &&
+      l.id !== excludeId
+    );
+
+    const newFrom = new Date(fromDate);
+    const newTo = new Date(toDate);
+
+    return empLeaves.some((leave: any) => {
+      const leaveFrom = new Date(leave.from);
+      const leaveTo = new Date(leave.to);
+
+      // Check if dates overlap
+      return (newFrom <= leaveTo && newTo >= leaveFrom);
+    });
+  };
+
+  // Check department capacity constraints
+  const checkCapacityConstraints = (empId: string, fromDate: string, toDate: string): { allowed: boolean; reason?: string } => {
+    const emp = employees.find((e: any) => e.id === empId);
+    if (!emp) return { allowed: false, reason: 'Employee not found' };
+
+    const deptConfig = leaveCapacityConfig[emp.department] || leaveCapacityConfig.default;
+    const requestedDays = calcDays(fromDate, toDate);
+
+    // Check max days per month
+    const fromMonth = new Date(fromDate).getMonth();
+    const toMonth = new Date(toDate).getMonth();
+
+    if (fromMonth === toMonth) {
+      // Same month - check monthly limit
+      const monthLeaves = data.filter((l: any) =>
+        l.empId === empId &&
+        l.status === 'Approved' &&
+        new Date(l.from).getMonth() === fromMonth &&
+        new Date(l.from).getFullYear() === new Date(fromDate).getFullYear()
+      );
+
+      const totalMonthDays = monthLeaves.reduce((sum: number, l: any) => sum + l.days, 0) + requestedDays;
+
+      if (totalMonthDays > deptConfig.maxDaysPerMonth) {
+        return {
+          allowed: false,
+          reason: `Exceeds department monthly limit (${deptConfig.maxDaysPerMonth} days for ${emp.department})`
+        };
+      }
+    }
+
+    // Check concurrent leave percentage
+    const deptEmployees = employees.filter((e: any) => e.department === emp.department).length;
+    const concurrentLeaves = data.filter((l: any) =>
+      l.status === 'Approved' &&
+      employees.find((e: any) => e.id === l.empId)?.department === emp.department &&
+      checkOverlap(l.empId, fromDate, toDate)
+    );
+
+    const concurrentPercent = ((concurrentLeaves.length + 1) / deptEmployees) * 100;
+
+    if (concurrentPercent > deptConfig.maxConcurrentPercent) {
+      return {
+        allowed: false,
+        reason: `Exceeds department concurrent leave limit (${deptConfig.maxConcurrentPercent}% for ${emp.department})`
+      };
+    }
+
+    return { allowed: true };
+  };
+
+  // Force end overlapping leaves (for urgent cases)
+  const forceEndLeave = (leaveId: string, endDate: string) => {
+    setData(prev => prev.map((l: any) =>
+      l.id === leaveId
+        ? { ...l, to: endDate, days: calcDays(l.from, endDate), status: 'Force Ended' }
+        : l
+    ));
+    showToast('Leave force-ended successfully');
+  };
+
   const counts = useMemo(() => ({
     total: data.filter((l: any) => visibleEmployeeIds.has(l.empId)).length,
     pending: data.filter((l: any) => visibleEmployeeIds.has(l.empId) && l.status === 'Pending').length,
@@ -116,9 +209,50 @@ export default function Leave() {
   const newDays = calcDays(newFrom, newTo);
 
   function submitNew() {
-    if (!newEmp || !newFrom || !newTo || !newReason || !newRequestedAmount) { showToast('Please fill all required fields', 'error'); return; }
+    if (!newEmp || !newFrom || !newTo || !newReason || !newRequestedAmount) {
+      showToast('Please fill all required fields', 'error');
+      return;
+    }
+
+    // Check for overlapping leaves
+    if (checkOverlap(newEmp, newFrom, newTo)) {
+      showToast('Leave dates overlap with existing approved leave', 'error');
+      return;
+    }
+
+    // Check capacity constraints
+    const capacityCheck = checkCapacityConstraints(newEmp, newFrom, newTo);
+    if (!capacityCheck.allowed) {
+      showToast(capacityCheck.reason || 'Capacity constraint violation', 'error');
+      return;
+    }
+
     setSaving(true);
-    setTimeout(() => { const emp = employees.find((e: any) => e.id === newEmp); setData(prev => [{ id: 'LR' + String(prev.length + 1).padStart(3, '0'), empId: newEmp, empName: emp?.name || '', leaveType: newType, from: newFrom, to: newTo, days: newDays, reason: newReason, requestedAmount: parseFloat(newRequestedAmount), appliedOn: new Date().toISOString().split('T')[0], status: 'Pending' }, ...prev]); setSaving(false); setNewModal(false); setNewEmp(''); setNewType('Annual'); setNewFrom(''); setNewTo(''); setNewReason(''); setNewRequestedAmount(''); showToast('Leave request submitted'); }, 600);
+    setTimeout(() => {
+      const emp = employees.find((e: any) => e.id === newEmp);
+      setData(prev => [{
+        id: 'LR' + String(prev.length + 1).padStart(3, '0'),
+        empId: newEmp,
+        empName: emp?.name || '',
+        leaveType: newType,
+        from: newFrom,
+        to: newTo,
+        days: newDays,
+        reason: newReason,
+        requestedAmount: parseFloat(newRequestedAmount),
+        appliedOn: new Date().toISOString().split('T')[0],
+        status: 'Pending'
+      }, ...prev]);
+      setSaving(false);
+      setNewModal(false);
+      setNewEmp('');
+      setNewType('Annual');
+      setNewFrom('');
+      setNewTo('');
+      setNewReason('');
+      setNewRequestedAmount('');
+      showToast('Leave request submitted successfully');
+    }, 600);
   }
 
   const earlyOrigDays = earlyModal ? calcDays(earlyModal.from, earlyModal.to) : 0;
@@ -208,6 +342,102 @@ export default function Leave() {
             <div style={{ fontSize: 9, color: 'rgba(255,255,255,.6)', marginTop: 2 }}>{c.sub}</div>
           </div>
         ))}
+      </div>
+
+      {/* ── Leave Capacity & Policy Overview ── */}
+      <div className="card" style={{ marginBottom: 18 }}>
+        <div className="ch">
+          <div className="ct">
+            <div className="ct-ico orange">
+              <Shield size={13} />
+            </div>
+            Leave Capacity & Policy Enforcement
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--t3)' }}>
+            Department-wise capacity limits & concurrent leave monitoring
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+          {Object.entries(leaveCapacityConfig).filter(([dept]) => dept !== 'default').map(([dept, config]) => {
+            const deptEmployees = employees.filter((e: any) => e.department === dept);
+            const deptLeaves = data.filter((l: any) =>
+              l.status === 'Approved' &&
+              deptEmployees.some((e: any) => e.id === l.empId)
+            );
+
+            // Current month concurrent leaves
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            const currentConcurrent = deptLeaves.filter((l: any) => {
+              const leaveMonth = new Date(l.from).getMonth();
+              const leaveYear = new Date(l.from).getFullYear();
+              return leaveMonth === currentMonth && leaveYear === currentYear;
+            }).length;
+
+            const concurrentPercent = deptEmployees.length > 0 ? (currentConcurrent / deptEmployees.length) * 100 : 0;
+            const isNearLimit = concurrentPercent >= config.maxConcurrentPercent * 0.8;
+
+            return (
+              <div key={dept} style={{
+                padding: 16,
+                border: `1px solid ${isNearLimit ? 'var(--redl)' : 'var(--border)'}`,
+                borderRadius: 8,
+                background: isNearLimit ? 'var(--redll)' : 'var(--card-bg)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <div style={{ fontWeight: 700, color: 'var(--t1)' }}>{dept}</div>
+                  {isNearLimit && <AlertTriangle size={16} color="var(--red)" />}
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 12 }}>
+                  <div>
+                    <div style={{ color: 'var(--t3)', marginBottom: 4 }}>Concurrent Leave</div>
+                    <div style={{ fontWeight: 600, color: isNearLimit ? 'var(--red)' : 'var(--t1)' }}>
+                      {currentConcurrent}/{deptEmployees.length} ({concurrentPercent.toFixed(1)}%)
+                    </div>
+                    <div style={{ color: 'var(--t3)', fontSize: 10 }}>Limit: {config.maxConcurrentPercent}%</div>
+                  </div>
+
+                  <div>
+                    <div style={{ color: 'var(--t3)', marginBottom: 4 }}>Monthly Limit</div>
+                    <div style={{ fontWeight: 600, color: 'var(--t1)' }}>
+                      {config.maxDaysPerMonth} days
+                    </div>
+                    <div style={{ color: 'var(--t3)', fontSize: 10 }}>per employee</div>
+                  </div>
+                </div>
+
+                {isNearLimit && (
+                  <div style={{
+                    marginTop: 12,
+                    padding: 8,
+                    background: 'var(--redll)',
+                    border: '1px solid var(--redl)',
+                    borderRadius: 6,
+                    fontSize: 11,
+                    color: 'var(--red)'
+                  }}>
+                    ⚠️ Approaching capacity limit - Review new requests carefully
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={{ marginTop: 16, padding: 12, background: 'var(--inp)', borderRadius: 8 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--t1)', marginBottom: 8 }}>
+            Policy Enforcement Active:
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, fontSize: 11, color: 'var(--t3)' }}>
+            <span>✅ Overlap Detection</span>
+            <span>✅ Capacity Constraints</span>
+            <span>✅ Department Limits</span>
+            <span>✅ Automatic Balance Updates</span>
+            <span>✅ Force End Leave (Admin Only)</span>
+          </div>
+        </div>
       </div>
 
       <div className="tabs">
@@ -313,7 +543,26 @@ export default function Leave() {
                           <button className="ico-btn" title="Reject" style={{ background: 'var(--redl)', color: 'var(--red)', border: 'none', width: 28, height: 28 }} onClick={() => setRejectModal(l)}><X size={13} /></button>
                           <button className="ico-btn" title="Edit" style={{ width: 28, height: 28 }} onClick={() => openEdit(l)}><Pencil size={13} /></button>
                         </>}
-                        {l.status === 'Approved' && <button className="btn btn-sm btn-ghost" onClick={() => openEarly(l)}><RotateCcw size={12} /> Early Return</button>}
+                        {l.status === 'Approved' && (
+                          <div style={{ display: 'flex', gap: 4 }}>
+                            <button className="btn btn-sm btn-ghost" onClick={() => openEarly(l)}>
+                              <RotateCcw size={12} /> Early Return
+                            </button>
+                            {activeRole === 'super_admin' && (
+                              <button
+                                className="btn btn-sm btn-danger"
+                                onClick={() => {
+                                  const endDate = prompt('Enter force end date (YYYY-MM-DD):', l.to);
+                                  if (endDate && endDate !== l.to) {
+                                    forceEndLeave(l.id, endDate);
+                                  }
+                                }}
+                              >
+                                <AlertTriangle size={12} /> Force End
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </td>
                   </tr>

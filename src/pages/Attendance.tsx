@@ -15,6 +15,7 @@ interface Employee {
   status: EmployeeStatus;
   notes: string;
   lates: number;
+  state?: 'draft' | 'saved' | 'submitted' | 'acknowledged' | 'unlock_requested';
 }
 
 const GRADS = [
@@ -36,18 +37,18 @@ const t12 = (time: string) => {
 };
 
 const EMPS: Employee[] = [
-  { name: 'Ahmed Raza', code: 'E-101', dept: 'Sales', mgr: 'Ahmed Khan', shift: 'Morning', ci: '09:04', co: '06:02', status: 'Present', notes: '', lates: 4 },
-  { name: 'Sana Iqbal', code: 'E-102', dept: 'Accounts', mgr: 'Sara Malik', shift: 'Morning', ci: '09:18', co: '06:10', status: 'Late', notes: 'Traffic on Shahrah', lates: 3 },
-  { name: 'Bilal Khan', code: 'E-103', dept: 'IT', mgr: 'Usman Tariq', shift: 'Evening', ci: '02:00', co: '10:05', status: 'Present', notes: 'Covering for Hamza', lates: 0 },
-  { name: 'Hira Saleem', code: 'E-104', dept: 'HR', mgr: 'Sara Malik', shift: 'Morning', ci: '--', co: '--', status: 'On Leave', notes: 'CL approved', lates: 0 },
-  { name: 'Usman Tariq', code: 'E-105', dept: 'Warehouse', mgr: 'Ahmed Khan', shift: 'Night', ci: '10:11', co: '06:01', status: 'Present', notes: 'Shift swap', lates: 2 },
-  { name: 'Mariam Yousuf', code: 'E-106', dept: 'Marketing', mgr: 'Nadia Sheikh', shift: 'Morning', ci: '--', co: '--', status: 'Absent', notes: 'No leave application', lates: 0 },
-  { name: 'Faraz Ali', code: 'E-107', dept: 'Sales', mgr: 'Ahmed Khan', shift: 'Morning', ci: '09:02', co: '06:00', status: 'Present', notes: 'DHA visit', lates: 0 },
-  { name: 'Zoya Hashmi', code: 'E-108', dept: 'Accounts', mgr: 'Sara Malik', shift: 'Evening', ci: '02:25', co: '10:10', status: 'Late', notes: 'Bank work', lates: 4 },
-  { name: 'Kamran Sheikh', code: 'E-109', dept: 'IT', mgr: 'Usman Tariq', shift: 'Morning', ci: '09:00', co: '06:00', status: 'Present', notes: '', lates: 1 },
-  { name: 'Rabia Noor', code: 'E-110', dept: 'HR', mgr: 'Sara Malik', shift: 'Morning', ci: '09:05', co: '06:00', status: 'Present', notes: '', lates: 0 },
-  { name: 'Hassan Malik', code: 'E-111', dept: 'Operations', mgr: 'Nadia Sheikh', shift: 'Morning', ci: '08:55', co: '05:58', status: 'Present', notes: '', lates: 0 },
-  { name: 'Ayesha Siddiq', code: 'E-112', dept: 'Engineering', mgr: 'Ahmed Khan', shift: 'Evening', ci: '02:10', co: '10:00', status: 'Late', notes: '', lates: 2 },
+  { name: 'Ahmed Raza', code: 'E-101', dept: 'Sales', mgr: 'Ahmed Khan', shift: 'Morning', ci: '09:04', co: '06:02', status: 'Present', notes: '', lates: 4, state: 'submitted' },
+  { name: 'Sana Iqbal', code: 'E-102', dept: 'Accounts', mgr: 'Sara Malik', shift: 'Morning', ci: '09:18', co: '06:10', status: 'Late', notes: 'Traffic on Shahrah', lates: 3, state: 'submitted' },
+  { name: 'Bilal Khan', code: 'E-103', dept: 'IT', mgr: 'Usman Tariq', shift: 'Evening', ci: '02:00', co: '10:05', status: 'Present', notes: 'Covering for Hamza', lates: 0, state: 'saved' },
+  { name: 'Hira Saleem', code: 'E-104', dept: 'HR', mgr: 'Sara Malik', shift: 'Morning', ci: '--', co: '--', status: 'On Leave', notes: 'CL approved', lates: 0, state: 'acknowledged' },
+  { name: 'Usman Tariq', code: 'E-105', dept: 'Warehouse', mgr: 'Ahmed Khan', shift: 'Night', ci: '10:11', co: '06:01', status: 'Present', notes: 'Shift swap', lates: 2, state: 'submitted' },
+  { name: 'Mariam Yousuf', code: 'E-106', dept: 'Marketing', mgr: 'Nadia Sheikh', shift: 'Morning', ci: '--', co: '--', status: 'Absent', notes: 'No leave application', lates: 0, state: 'draft' },
+  { name: 'Faraz Ali', code: 'E-107', dept: 'Sales', mgr: 'Ahmed Khan', shift: 'Morning', ci: '09:02', co: '06:00', status: 'Present', notes: 'DHA visit', lates: 0, state: 'submitted' },
+  { name: 'Zoya Hashmi', code: 'E-108', dept: 'Accounts', mgr: 'Sara Malik', shift: 'Evening', ci: '02:25', co: '10:10', status: 'Late', notes: 'Bank work', lates: 4, state: 'submitted' },
+  { name: 'Kamran Sheikh', code: 'E-109', dept: 'IT', mgr: 'Usman Tariq', shift: 'Morning', ci: '09:00', co: '06:00', status: 'Present', notes: '', lates: 1, state: 'submitted' },
+  { name: 'Rabia Noor', code: 'E-110', dept: 'HR', mgr: 'Sara Malik', shift: 'Morning', ci: '09:05', co: '06:00', status: 'Present', notes: '', lates: 0, state: 'submitted' },
+  { name: 'Hassan Malik', code: 'E-111', dept: 'Operations', mgr: 'Nadia Sheikh', shift: 'Morning', ci: '08:55', co: '05:58', status: 'Present', notes: '', lates: 0, state: 'acknowledged' },
+  { name: 'Ayesha Siddiq', code: 'E-112', dept: 'Engineering', mgr: 'Ahmed Khan', shift: 'Evening', ci: '02:10', co: '10:00', status: 'Late', notes: '', lates: 2, state: 'submitted' },
 ];
 
 const HR_DEPT = 'IT';
@@ -70,6 +71,11 @@ const Attendance = () => {
   const [modalStatus, setModalStatus] = useState<EmployeeStatus>('Present');
   const [modalNotes, setModalNotes] = useState<string>('');
   const [saveLabel, setSaveLabel] = useState<string>('Save Entry');
+  const today = new Date();
+  const [attendanceRows, setAttendanceRows] = useState<Employee[]>(EMPS.map((emp) => ({ ...emp, state: emp.state || 'draft' })));
+  const [modalDate, setModalDate] = useState<string>(today.toISOString().slice(0, 10));
+  const [modalIn, setModalIn] = useState<string>('09:00');
+  const [modalOut, setModalOut] = useState<string>('18:00');
 
   useEffect(() => {
     if (activeRole === 'super_admin') {
@@ -102,19 +108,19 @@ const Attendance = () => {
   }, [isSuperAdmin, isHR]);
 
   const selectedEmployee = useMemo(
-    () => EMPS.find((emp) => emp.code === selectedEmployeeCode) || null,
-    [selectedEmployeeCode]
+    () => attendanceRows.find((emp) => emp.code === selectedEmployeeCode) || null,
+    [attendanceRows, selectedEmployeeCode]
   );
 
   const employeeRecord = useMemo(() => {
     if (isEmployee && user?.employeeId) {
-      return EMPS.find((emp) => emp.code === user.employeeId) || EMPS[0];
+      return attendanceRows.find((emp) => emp.code === user.employeeId) || attendanceRows[0];
     }
-    return EMPS[0];
-  }, [isEmployee, user]);
+    return attendanceRows[0];
+  }, [attendanceRows, isEmployee, user]);
 
   const filteredSA = useMemo(() => {
-    return EMPS.filter((emp) => {
+    return attendanceRows.filter((emp) => {
       if (deptFilter !== 'All Departments' && emp.dept !== deptFilter) return false;
       if (mgrFilter !== 'All Managers' && emp.mgr !== mgrFilter) return false;
       if (statusFilter !== 'All Status' && emp.status !== statusFilter) return false;
@@ -125,9 +131,9 @@ const Attendance = () => {
       }
       return true;
     });
-  }, [deptFilter, mgrFilter, statusFilter, searchTerm, saStatFilter]);
+  }, [attendanceRows, deptFilter, mgrFilter, statusFilter, searchTerm, saStatFilter]);
 
-  const hrEmployees = useMemo(() => EMPS.filter((emp) => emp.dept === HR_DEPT), []);
+  const hrEmployees = useMemo(() => attendanceRows.filter((emp) => emp.dept === HR_DEPT), [attendanceRows]);
 
   const filteredHR = useMemo(() => {
     return hrEmployees.filter((emp) => {
@@ -139,12 +145,12 @@ const Attendance = () => {
 
   const saCounts = useMemo(
     () => ({
-      present: EMPS.filter((emp) => emp.status === 'Present').length,
-      late: EMPS.filter((emp) => emp.status === 'Late').length,
-      absent: EMPS.filter((emp) => emp.status === 'Absent').length,
-      onLeave: EMPS.filter((emp) => emp.status === 'On Leave').length,
+      present: attendanceRows.filter((emp) => emp.status === 'Present').length,
+      late: attendanceRows.filter((emp) => emp.status === 'Late').length,
+      absent: attendanceRows.filter((emp) => emp.status === 'Absent').length,
+      onLeave: attendanceRows.filter((emp) => emp.status === 'On Leave').length,
     }),
-    []
+    [attendanceRows]
   );
 
   const hrCounts = useMemo(
@@ -165,7 +171,64 @@ const Attendance = () => {
     setSaStatFilter('All');
   };
 
+  const requestUnlockAttendance = (empCode: string) => {
+    setAttendanceRows((prev) =>
+      prev.map((emp) =>
+        emp.code === empCode && emp.state === 'submitted'
+          ? { ...emp, state: 'unlock_requested' }
+          : emp
+      )
+    );
+  };
+
+  const submitAttendance = (empCode: string) => {
+    setAttendanceRows((prev) =>
+      prev.map((emp) =>
+        emp.code === empCode
+          ? { ...emp, state: 'submitted' }
+          : emp
+      )
+    );
+  };
+
+  const unlockAttendance = (empCode: string) => {
+    setAttendanceRows((prev) =>
+      prev.map((emp) =>
+        emp.code === empCode && (emp.state === 'submitted' || emp.state === 'unlock_requested')
+          ? { ...emp, state: 'saved' }
+          : emp
+      )
+    );
+  };
+
+  const acknowledgeAttendance = (empCode: string) => {
+    setAttendanceRows((prev) =>
+      prev.map((emp) =>
+        emp.code === empCode && emp.state === 'submitted'
+          ? { ...emp, state: 'acknowledged' }
+          : emp
+      )
+    );
+  };
+
   const saveAttendance = () => {
+    if (selectedEmployee) {
+      setAttendanceRows((prev) =>
+        prev.map((emp) =>
+          emp.code === selectedEmployee.code
+            ? {
+                ...emp,
+                ci: modalIn,
+                co: modalOut,
+                status: modalStatus,
+                notes: modalNotes,
+                state: emp.state === 'submitted' ? 'submitted' : 'saved',
+              }
+            : emp
+        )
+      );
+    }
+
     setSaveLabel('Saved!');
     setTimeout(() => {
       setSaveLabel('Save Entry');
@@ -173,6 +236,9 @@ const Attendance = () => {
       setSelectedEmployeeCode('');
       setModalStatus('Present');
       setModalNotes('');
+      setModalDate(today.toISOString().slice(0, 10));
+      setModalIn('09:00');
+      setModalOut('18:00');
     }, 1200);
   };
 
@@ -272,8 +338,8 @@ const Attendance = () => {
 
   const countRow = filteredSA.length;
   const countHr = filteredHR.length;
-  const today = new Date();
-  const formattedDate = today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const displayDate = new Date();
+  const formattedDate = displayDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   return (
     <div className="page">
@@ -313,7 +379,7 @@ const Attendance = () => {
               <div className="scard-icon" style={{ background: '#d1fae5', color: '#059669', marginLeft: 6 }}>✅</div>
               <div className="scard-val" style={{ marginLeft: 6 }}>{saCounts.present}</div>
               <div className="scard-lbl" style={{ marginLeft: 6 }}>Present Today</div>
-              <div className="scard-sub" style={{ marginLeft: 6 }}>{Math.round((saCounts.present / EMPS.length) * 100)}% attendance</div>
+              <div className="scard-sub" style={{ marginLeft: 6 }}>{attendanceRows.length > 0 ? Math.round((saCounts.present / attendanceRows.length) * 100) : 0}% attendance</div>
             </div>
             <div className={`scard ${saStatFilter === 'Late' ? 'on' : ''}`} onClick={() => setSaStatFilter(saStatFilter === 'Late' ? 'All' : 'Late')}>
               <div className="scard-accent" style={{ background: '#f59e0b' }} />
@@ -374,7 +440,7 @@ const Attendance = () => {
               <div className="fitem"><span>📅</span><input type="date" /></div>
               <div className="fsearch"><span>🔍</span><input type="text" value={searchTerm} placeholder="Search name, code, dept, manager..." onChange={(e) => setSearchTerm(e.target.value)} /></div>
               <button className="clrbtn" type="button" onClick={clearFilters}>Clear ✕</button>
-              <span style={{ fontSize: 10, color: '#9ca3af', marginLeft: 'auto', whiteSpace: 'nowrap'}}><strong id="f-shown" style={{ color: '#374151' }}>{countRow}</strong> / <strong style={{ color: '#374151' }}>{EMPS.length}</strong></span>
+              <span style={{ fontSize: 10, color: '#9ca3af', marginLeft: 'auto', whiteSpace: 'nowrap'}}><strong id="f-shown" style={{ color: '#374151' }}>{countRow}</strong> / <strong style={{ color: '#374151' }}>{attendanceRows.length}</strong></span>
             </div>
             <div style={{ overflowX: 'auto' }}>
               <table className="tbl">
@@ -386,12 +452,14 @@ const Attendance = () => {
                   <th style={{ width: 80 }}>Check In</th>
                   <th style={{ width: 80 }}>Check Out</th>
                   <th style={{ width: 80 }}>Status</th>
+                  <th style={{ width: 80 }}>State</th>
                   <th style={{ width: 110 }}>Notes</th>
                   <th style={{ width: 50 }}>Lates</th>
+                  <th style={{ width: 120 }}>Actions</th>
                 </tr></thead>
                 <tbody>
                   {filteredSA.length === 0 ? (
-                    <tr><td colSpan={9} style={{ textAlign: 'center', padding: 36, color: '#9ca3af', fontSize: 12 }}>No matching records</td></tr>
+                    <tr><td colSpan={11} style={{ textAlign: 'center', padding: 36, color: '#9ca3af', fontSize: 12 }}>No matching records</td></tr>
                   ) : filteredSA.map((emp) => (
                     <tr key={emp.code}>
                       <td>
@@ -409,14 +477,25 @@ const Attendance = () => {
                       <td><span style={{ fontSize: 11, cursor: 'pointer', background: '#f8fafc', padding: '2px 6px', borderRadius: 5 }} title="Click to edit">🕒 {t12(emp.ci)}</span></td>
                       <td><span style={{ fontSize: 11, cursor: 'pointer', background: '#f8fafc', padding: '2px 6px', borderRadius: 5 }} title="Click to edit">🕒 {t12(emp.co)}</span></td>
                       <td dangerouslySetInnerHTML={{ __html: statusBadge(emp.status) }} />
+                      <td dangerouslySetInnerHTML={{ __html: stateBadge(emp.state || 'draft') }} />
                       <td><span className="notecell" title={emp.notes}>{emp.notes || '—'}</span></td>
                       <td><button className="lbtn" type="button">{emp.lates > 0 ? <span className="lnum">{emp.lates}</span> : <span style={{ color: '#9ca3af', fontFamily: 'monospace' }}>0</span>}</button></td>
+                      <td>
+                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                          {(emp.state === 'draft' || emp.state === 'saved') && <button className="btn btn-sm btn-primary" onClick={() => submitAttendance(emp.code)}>Submit</button>}
+                          {emp.state === 'submitted' && <>
+                            <button className="btn btn-sm btn-secondary" onClick={() => unlockAttendance(emp.code)}>Unlock</button>
+                            <button className="btn btn-sm btn-ghost" onClick={() => requestUnlockAttendance(emp.code)}>Request Unlock</button>
+                          </>}
+                          {emp.state === 'unlock_requested' && <button className="btn btn-sm btn-primary" onClick={() => unlockAttendance(emp.code)}>Approve Unlock</button>}
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <div className="foot"><span id="sa-foot">Showing {countRow} of {EMPS.length} employees · Click any field to edit inline</span><span id="sa-time">Updated {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></div>
+            <div className="foot"><span id="sa-foot">Showing {countRow} of {attendanceRows.length} employees · Click any field to edit inline</span><span id="sa-time">Updated {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></div>
           </div>
         </div>
       )}
@@ -477,12 +556,14 @@ const Attendance = () => {
                   <th style={{ width: 85 }}>Check In</th>
                   <th style={{ width: 85 }}>Check Out</th>
                   <th style={{ width: 85 }}>Status</th>
+                  <th style={{ width: 85 }}>State</th>
                   <th style={{ width: 120 }}>Notes</th>
                   <th style={{ width: 55 }}>Lates</th>
+                  <th style={{ width: 120 }}>Actions</th>
                 </tr></thead>
                 <tbody>
                   {filteredHR.length === 0 ? (
-                    <tr><td colSpan={7} style={{ textAlign: 'center', padding: 36, color: '#9ca3af', fontSize: 12 }}>No matching records</td></tr>
+                    <tr><td colSpan={9} style={{ textAlign: 'center', padding: 36, color: '#9ca3af', fontSize: 12 }}>No matching records</td></tr>
                   ) : filteredHR.map((emp) => (
                     <tr key={emp.code}>
                       <td>
@@ -498,8 +579,19 @@ const Attendance = () => {
                       <td><span style={{ fontSize: 11, cursor: 'pointer', background: '#f8fafc', padding: '2px 6px', borderRadius: 5 }}>🕒 {t12(emp.ci)}</span></td>
                       <td><span style={{ fontSize: 11, cursor: 'pointer', background: '#f8fafc', padding: '2px 6px', borderRadius: 5 }}>🕒 {t12(emp.co)}</span></td>
                       <td dangerouslySetInnerHTML={{ __html: statusBadge(emp.status) }} />
+                      <td dangerouslySetInnerHTML={{ __html: stateBadge(emp.state || 'submitted') }} />
                       <td><span className="notecell" title={emp.notes}>{emp.notes || '—'}</span></td>
                       <td><button className="lbtn" type="button">{emp.lates > 0 ? <span className="lnum">{emp.lates}</span> : <span style={{ color: '#9ca3af', fontFamily: 'monospace' }}>0</span>}</button></td>
+                      <td>
+                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                          {(emp.state === 'draft' || emp.state === 'saved') && <button className="btn btn-sm btn-primary" onClick={() => submitAttendance(emp.code)}>Submit</button>}
+                          {emp.state === 'submitted' && <>
+                            <button className="btn btn-sm btn-secondary" onClick={() => unlockAttendance(emp.code)}>Unlock</button>
+                            <button className="btn btn-sm btn-ghost" onClick={() => requestUnlockAttendance(emp.code)}>Request Unlock</button>
+                          </>}
+                          {emp.state === 'unlock_requested' && <button className="btn btn-sm btn-primary" onClick={() => unlockAttendance(emp.code)}>Approve Unlock</button>}
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -533,8 +625,10 @@ const Attendance = () => {
                   <th style={{ width: 85 }}>Check In</th>
                   <th style={{ width: 85 }}>Check Out</th>
                   <th style={{ width: 85 }}>Status</th>
+                  <th style={{ width: 85 }}>State</th>
                   <th style={{ width: 120 }}>Notes</th>
                   <th style={{ width: 55 }}>Lates</th>
+                  <th style={{ width: 100 }}>Actions</th>
                 </tr></thead>
                 <tbody>
                   <tr>
@@ -551,8 +645,12 @@ const Attendance = () => {
                     <td><span style={{ fontSize: 11, background: '#f8fafc', padding: '2px 6px', borderRadius: 5 }}>🕒 {t12(employeeRecord.ci)}</span></td>
                     <td><span style={{ fontSize: 11, background: '#f8fafc', padding: '2px 6px', borderRadius: 5 }}>🕒 {t12(employeeRecord.co)}</span></td>
                     <td dangerouslySetInnerHTML={{ __html: statusBadge(employeeRecord.status) }} />
+                    <td dangerouslySetInnerHTML={{ __html: stateBadge(employeeRecord.state || 'acknowledged') }} />
                     <td><span className="notecell" title={employeeRecord.notes}>{employeeRecord.notes || '—'}</span></td>
                     <td><button className="lbtn" type="button">{employeeRecord.lates > 0 ? <span className="lnum">{employeeRecord.lates}</span> : <span style={{ color: '#9ca3af', fontFamily: 'monospace' }}>0</span>}</button></td>
+                    <td>
+                      {(employeeRecord.state === 'submitted') && <button className="btn btn-sm btn-success" onClick={() => acknowledgeAttendance(employeeRecord.code)}>Acknowledge</button>}
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -594,11 +692,11 @@ const Attendance = () => {
               )}
               <div className="fg">
                 <div className="fl">Date</div>
-                <input type="date" className="fi" defaultValue={today.toISOString().slice(0, 10)} />
+                <input type="date" className="fi" value={modalDate} onChange={(e) => setModalDate(e.target.value)} />
               </div>
               <div className="frow">
-                <div className="fg"><div className="fl">Check In</div><input type="time" className="fi" defaultValue="09:00" /></div>
-                <div className="fg"><div className="fl">Check Out</div><input type="time" className="fi" defaultValue="18:00" /></div>
+                <div className="fg"><div className="fl">Check In</div><input type="time" className="fi" value={modalIn} onChange={(e) => setModalIn(e.target.value)} /></div>
+                <div className="fg"><div className="fl">Check Out</div><input type="time" className="fi" value={modalOut} onChange={(e) => setModalOut(e.target.value)} /></div>
               </div>
               <div className="fg">
                 <div className="fl">Status</div>
@@ -668,6 +766,15 @@ const statusBadge = (status: EmployeeStatus) => {
   if (status === 'Late') return '<span class="stbadge sl">Late</span>';
   if (status === 'Absent') return '<span class="stbadge sa2">Absent</span>';
   return '<span class="stbadge so">On Leave</span>';
+};
+
+const stateBadge = (state: string) => {
+  if (state === 'draft') return '<span class="stbadge" style="background:#f3f4f6;color:#6b7280;border-color:#d1d5db;">Draft</span>';
+  if (state === 'saved') return '<span class="stbadge" style="background:#dbeafe;color:#1e40af;border-color:#bfdbfe;">Saved</span>';
+  if (state === 'submitted') return '<span class="stbadge" style="background:#fef3c7;color:#92400e;border-color:#fde68a;">Submitted</span>';
+  if (state === 'unlock_requested') return '<span class="stbadge" style="background:#fcd34d;color:#78350f;border-color:#fbbf24;">Unlock Requested</span>';
+  if (state === 'acknowledged') return '<span class="stbadge" style="background:#d1fae5;color:#065f46;border-color:#a7f3d0;">Acknowledged</span>';
+  return '<span class="stbadge" style="background:#f3f4f6;color:#6b7280;border-color:#d1d5db;">Unknown</span>';
 };
 
 export default Attendance;

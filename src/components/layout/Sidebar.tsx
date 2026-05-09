@@ -36,6 +36,8 @@ export default function Sidebar() {
     { to: '/launchpad', icon: Zap, label: 'Launchpad' },
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/hr/branch-dashboard', icon: Building2, label: 'Branch HR Dashboard' },
+    { to: '/overview', icon: Monitor, label: 'Overview' },
+    { to: '/saved-reports', icon: ScrollText, label: 'Saved Reports' },
     { to: '/attendance-verification', icon: CalendarCheck, label: 'Attendance Verification' },
     { to: '/attendance-head-review', icon: ShieldCheck, label: 'Head HR Review' },
     { to: '/leave-capacity', icon: CalendarDays, label: 'Leave Capacity' },
@@ -50,12 +52,15 @@ export default function Sidebar() {
     { to: '/leave-wallet', icon: Wallet, label: 'Leave Wallet' },
     { to: '/penalty-ledger', icon: ClipboardList, label: 'Penalty Ledger' },
     { to: '/announcements', icon: Zap, label: 'Announcements' },
+    { to: '/calendar', icon: CalendarRange, label: 'Calendar Events' },
   ];
 
   const superAdminLinks: SidebarLink[] = [
     { to: '/launchpad', icon: Zap, label: 'Launchpad' },
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/hr/branch-dashboard', icon: Building2, label: 'Branch HR Dashboard' },
+    { to: '/overview', icon: Monitor, label: 'Overview' },
+    { to: '/saved-reports', icon: ScrollText, label: 'Saved Reports' },
     { to: '/attendance-head-review', icon: ShieldCheck, label: 'Head HR Review' },
     { to: '/attendance-report', icon: ClipboardList, label: 'Final Attendance Report' },
     { to: '/directory', icon: MapPin, label: 'Directory' },
@@ -66,6 +71,7 @@ export default function Sidebar() {
     { to: '/leave-wallet', icon: Wallet, label: 'Leave Wallet' },
     { to: '/penalty-ledger', icon: ClipboardList, label: 'Penalty Ledger' },
     { to: '/announcements', icon: Zap, label: 'Announcements' },
+    { to: '/calendar', icon: CalendarRange, label: 'Calendar Events' },
     { to: '/accounts', icon: ShieldCheck, label: 'HR Accounts' },
     { to: '/audit-log', icon: ScrollText, label: 'Audit Log' },
   ];
