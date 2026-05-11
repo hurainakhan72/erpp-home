@@ -90,11 +90,18 @@ const ProtectedRoute = ({ allowedRoles }: { allowedRoles: string[] }) => {
 function RootRedirect() {
   const { user, activeRole } = useAuth();
   if (!user) return <Navigate to="/login" />;
-  return activeRole === "employee" ? (
-    <Navigate to="/my-dashboard" />
-  ) : (
-    <Navigate to="/launchpad" />
-  );
+  
+  // Route based on role
+  if (activeRole === "employee") {
+    return <Navigate to="/my-dashboard" />;
+  } else if (activeRole === "department_hr") {
+    return <Navigate to="/dashboard" />; // Department HR sees filtered dashboard
+  } else if (activeRole === "branch_hr") {
+    return <Navigate to="/dashboard" />; // Branch HR sees filtered dashboard
+  } else {
+    // super_admin, head_hr
+    return <Navigate to="/launchpad" />;
+  }
 }
 
 const App = () => (
@@ -108,7 +115,7 @@ const App = () => (
             <Route path="/" element={<RootRedirect />} />
 
             {/* --- ADMIN & HR ROUTES (MainLayout) --- */}
-            <Route element={<ProtectedRoute allowedRoles={["super_admin", "admin", "hr"]} />}>
+            <Route element={<ProtectedRoute allowedRoles={["super_admin", "head_hr", "branch_hr", "department_hr"]} />}>
               <Route element={<MainLayout />}>
                 {/* Shared routes: both HR and SuperAdmin */}
                 <Route path="/launchpad" element={<Launchpad />} />

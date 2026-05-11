@@ -240,9 +240,20 @@ export const penaltiesConfig = [
 ];
 
 export const hrAccounts = [
-  { id: 'ACC001', username: 'superadmin', role: 'super_admin', password: 'admin123', linkedEmployee: '-', departments: ['All'], status: 'Active', created: '2020-01-01' },
-  { id: 'ACC002', username: 'hr1', role: 'hr', password: 'hr123', linkedEmployee: 'EMP003 - Usman Malik', departments: ['HR'], status: 'Active', created: '2021-03-10' },
-  { id: 'ACC003', username: 'hr2', role: 'hr', password: 'hr123', linkedEmployee: 'EMP002 - Sara Khan', departments: ['Marketing'], status: 'Active', created: '2021-03-15' },
+  // 1. SUPERADMIN - Full company access (all branches, all departments)
+  { id: 'ACC001', username: 'superadmin', role: 'super_admin', password: 'admin123', linkedEmployee: '-', branch: null, departments: ['All'], status: 'Active', created: '2020-01-01' },
+  
+  // 2. HEAD HR - Full company access (all branches, all departments)
+  { id: 'ACC002', username: 'head_hr', role: 'head_hr', password: 'headhr123', linkedEmployee: 'EMP003 - Usman Malik', branch: null, departments: ['All'], status: 'Active', created: '2021-01-15' },
+  
+  // 3. BRANCH HR - Only Head Office branch data
+  { id: 'ACC003', username: 'branch_hr_ho', role: 'branch_hr', password: 'branch123', linkedEmployee: '-', branch: 'Head Office', departments: ['All'], status: 'Active', created: '2021-03-10' },
+  
+  // 4. DEPARTMENT HR - Only Engineering department in Head Office
+  { id: 'ACC004', username: 'dept_hr_eng', role: 'department_hr', password: 'dept123', linkedEmployee: '-', branch: 'Head Office', departments: ['Engineering'], status: 'Active', created: '2021-06-01' },
+  
+  // 5. EMPLOYEE - Regular employee account
+  { id: 'ACC005', username: 'emp_001', role: 'employee', password: 'emp123', linkedEmployee: 'EMP001 - Ahmed Ali', branch: 'Head Office', departments: ['Engineering'], status: 'Active', created: '2020-01-15' },
 ];
 
 export const customFields = {

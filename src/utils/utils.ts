@@ -1,14 +1,17 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { User } from "../context/AuthContext";
+import { filterEmployeesByRole } from "./roleBasedAccess";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function getVisibleEmployees(user: { role: string; departments?: string[] } | null, activeRole: string, employees: any[]) {
-  if (!user || activeRole !== 'hr' || user.role !== 'hr') return employees;
-  if (!user.departments || user.departments.length === 0 || user.departments.includes('All')) return employees;
-  return employees.filter(emp => user.departments?.includes(emp.department));
+export function getVisibleEmployees(user: User | null, activeRole: string, employees: any[]) {
+  if (!user) return [];
+  
+  // Use the new role-based filtering
+  return filterEmployeesByRole(employees, user);
 }
 
 

@@ -186,7 +186,7 @@ export default function Dashboard() {
   const greeting = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
   const dateStr = now.toLocaleDateString("en-PK",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   const timeStr = now.toLocaleTimeString("en-PK",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false});
-  const uName = (user as any)?.name || "Super Admin";
+  const uName = (user as any)?.username || "User";
 
   // ── Notifications ──
   const notifs = [

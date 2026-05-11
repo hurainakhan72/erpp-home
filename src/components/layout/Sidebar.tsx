@@ -32,29 +32,6 @@ export default function Sidebar() {
 
   const initials = getUserInitials(user?.username || '');
 
-  const hrLinks: SidebarLink[] = [
-    { to: '/launchpad', icon: Zap, label: 'Launchpad' },
-    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/hr/branch-dashboard', icon: Building2, label: 'Branch HR Dashboard' },
-    { to: '/overview', icon: Monitor, label: 'Overview' },
-    { to: '/saved-reports', icon: ScrollText, label: 'Saved Reports' },
-    { to: '/attendance-verification', icon: CalendarCheck, label: 'Attendance Verification' },
-    { to: '/attendance-head-review', icon: ShieldCheck, label: 'Head HR Review' },
-    { to: '/leave-capacity', icon: CalendarDays, label: 'Leave Capacity' },
-    { to: '/penalty-workflow', icon: AlertTriangle, label: 'Penalty Workflow' },
-    { to: '/directory', icon: MapPin, label: 'Directory' },
-    { to: '/employees', icon: Users, label: 'Employees' },
-    { to: '/attendance', icon: CalendarCheck, label: 'Attendance', badge: '3' },
-    { to: '/duty-roster', icon: CalendarRange, label: 'Duty Roster' },
-    { to: '/leave', icon: CalendarDays, label: 'Leave', badge: '3' },
-    { to: '/payroll', icon: DollarSign, label: 'Payroll' },
-    { to: '/promotions', icon: TrendingUp, label: 'Promotions' },
-    { to: '/leave-wallet', icon: Wallet, label: 'Leave Wallet' },
-    { to: '/penalty-ledger', icon: ClipboardList, label: 'Penalty Ledger' },
-    { to: '/announcements', icon: Zap, label: 'Announcements' },
-    { to: '/calendar', icon: CalendarRange, label: 'Calendar Events' },
-  ];
-
   const superAdminLinks: SidebarLink[] = [
     { to: '/launchpad', icon: Zap, label: 'Launchpad' },
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -76,7 +53,42 @@ export default function Sidebar() {
     { to: '/audit-log', icon: ScrollText, label: 'Audit Log' },
   ];
 
-  const mainLinks = activeRole === 'super_admin' ? superAdminLinks : hrLinks;
+  // Head HR - Same as Superadmin (Full Company Access)
+  const headHrLinks: SidebarLink[] = superAdminLinks;
+
+  // Branch HR - Branch level access
+  const branchHrLinks: SidebarLink[] = [
+    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/hr/branch-dashboard', icon: Building2, label: 'Branch Dashboard' },
+    { to: '/directory', icon: MapPin, label: 'Directory' },
+    { to: '/employees', icon: Users, label: 'Employees' },
+    { to: '/attendance', icon: CalendarCheck, label: 'Attendance', badge: '3' },
+    { to: '/leave', icon: CalendarDays, label: 'Leave', badge: '3' },
+    { to: '/payroll', icon: DollarSign, label: 'Payroll' },
+    { to: '/leave-wallet', icon: Wallet, label: 'Leave Wallet' },
+    { to: '/penalty-ledger', icon: ClipboardList, label: 'Penalty Ledger' },
+    { to: '/announcements', icon: Zap, label: 'Announcements' },
+  ];
+
+  // Department HR - Department level access
+  const departmentHrLinks: SidebarLink[] = [
+    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/directory', icon: MapPin, label: 'Directory' },
+    { to: '/employees', icon: Users, label: 'Employees' },
+    { to: '/attendance', icon: CalendarCheck, label: 'Attendance', badge: '3' },
+    { to: '/leave', icon: CalendarDays, label: 'Leave', badge: '3' },
+    { to: '/payroll', icon: DollarSign, label: 'Payroll' },
+    { to: '/leave-wallet', icon: Wallet, label: 'Leave Wallet' },
+    { to: '/penalty-ledger', icon: ClipboardList, label: 'Penalty Ledger' },
+  ];
+
+  // Select menu based on role
+  const mainLinks = 
+    activeRole === 'super_admin' ? superAdminLinks :
+    activeRole === 'head_hr' ? headHrLinks :
+    activeRole === 'branch_hr' ? branchHrLinks :
+    activeRole === 'department_hr' ? departmentHrLinks :
+    [];
 
   const settingsLinks = [
     { to: '/settings/departments', label: 'Departments' },
@@ -154,7 +166,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {activeRole === 'super_admin' && (
+      {(activeRole === 'super_admin' || activeRole === 'head_hr') && (
         <>
           <div className="sb-div" />
           <div className="sb-sec">
@@ -174,12 +186,28 @@ export default function Sidebar() {
                     {link.label}
                   </NavLink>
                 ))}
-                <NavLink to="/settings/custom-fields" className={({ isActive }) => `nav-a ${isActive ? 'active' : ''}`}>
-                  <FormInput size={14} className="nav-ico" />
-                  Custom Fields
-                </NavLink>
+                {activeRole === 'super_admin' && (
+                  <NavLink to="/settings/custom-fields" className={({ isActive }) => `nav-a ${isActive ? 'active' : ''}`}>
+                    <FormInput size={14} className="nav-ico" />
+                    Custom Fields
+                  </NavLink>
+                )}
               </>
             )}
+          </div>
+        </>
+      )}
+
+      {activeRole === 'super_admin' && (
+        <>
+          <div className="sb-div" />
+          <div className="sb-sec">
+            {adminLinks.map(link => (
+              <NavLink key={link.to} to={link.to} className={({ isActive }) => `nav-a ${isActive ? 'active' : ''}`}>
+                <link.icon size={14} className="nav-ico" />
+                {link.label}
+              </NavLink>
+            ))}
           </div>
         </>
       )}
@@ -190,16 +218,22 @@ export default function Sidebar() {
         <div style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--t2)', padding: 12, borderRadius: 12, background: 'rgba(148,163,184,.08)' }}>
           {activeRole === 'super_admin' && (
             <>
-              Super Admin oversees all systems: branch data prep, head HR approvals, configurations, and final reports.
-              <br />
-              All HR workflow pages and accounts are visible here for complete oversight.
+              🔴 <strong>Super Admin:</strong> Full system oversight. Access all branches, departments, configurations, and audit logs. Can manage HR accounts and view final reports.
             </>
           )}
-          {activeRole === 'hr' && (
+          {activeRole === 'head_hr' && (
             <>
-              HR executes the approval workflow: Branch HR locks and prepares data, Head HR reviews and approves/rejects.
-              <br />
-              Super Admin reviews final outcomes.
+              🟠 <strong>Head HR:</strong> Company-wide visibility. Access all branches and departments like Super Admin. Review all attendance, leave, and payroll across the organization.
+            </>
+          )}
+          {activeRole === 'branch_hr' && (
+            <>
+              🟡 <strong>Branch HR:</strong> Branch-level manager. Access only {user?.branch} branch data. Manage attendance, leave, payroll, and employee records for your branch.
+            </>
+          )}
+          {activeRole === 'department_hr' && (
+            <>
+              🟢 <strong>Department HR:</strong> Department-level manager. Access only {user?.departments?.[0]} department in {user?.branch}. Manage records for your department only.
             </>
           )}
         </div>
