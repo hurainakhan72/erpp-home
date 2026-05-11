@@ -4,8 +4,10 @@ import { useData } from './DataContext';
 interface User {
   username: string;
   role: 'super_admin' | 'hr' | 'employee';
+  displayRole?: string;
   employeeId?: string;
   departments?: string[];
+  branch?: string;
 }
 
 interface AuthContextType {
@@ -19,6 +21,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+function normalizeRole(role: string): 'super_admin' | 'hr' | 'employee' {
+  const normalized = String(role || '').toLowerCase();
+  if (normalized.includes('super')) return 'super_admin';
+  if (normalized.includes('emp') || normalized.includes('employee')) return 'employee';
+  return 'hr';
+}
+
 const ACCOUNTS: Record<string, { password: string; role: 'super_admin' | 'hr' | 'employee'; employeeId?: string; departments?: string[] }> = {
   superadmin: { password: 'admin123', role: 'super_admin' },
   hr1: { password: 'hr123', role: 'hr', departments: ['HR'] },
@@ -28,11 +37,30 @@ const ACCOUNTS: Record<string, { password: string; role: 'super_admin' | 'hr' | 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
     const stored = localStorage.getItem('ems_user');
-    return stored ? JSON.parse(stored) : null;
+    if (!stored) return null;
+    try {
+      const parsed = JSON.parse(stored);
+      const role = normalizeRole(parsed.role);
+      const normalizedUser: User = {
+        ...parsed,
+        role,
+        displayRole: parsed.displayRole || parsed.role,
+      };
+      localStorage.setItem('ems_user', JSON.stringify(normalizedUser));
+      return normalizedUser;
+    } catch {
+      return null;
+    }
   });
   const [activeRole, setActiveRole] = useState<'super_admin' | 'hr' | 'employee'>(() => {
     const stored = localStorage.getItem('ems_user');
-    return stored ? JSON.parse(stored).role : 'hr';
+    if (!stored) return 'hr';
+    try {
+      const parsed = JSON.parse(stored);
+      return normalizeRole(parsed.role);
+    } catch {
+      return 'hr';
+    }
   });
   const { hrAccounts } = useData();
   const [loading, setLoading] = useState(true);
@@ -46,14 +74,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const hrAccount = hrAccounts.find((a: any) => a.username.toLowerCase() === lowerUser && a.password === password && a.status === 'Active');
     if (hrAccount) {
       const employeeId = hrAccount.linkedEmployee?.split(' ')[0];
+      const canonicalRole = normalizeRole(hrAccount.role);
       const u: User = {
         username: hrAccount.username,
-        role: hrAccount.role as 'super_admin' | 'hr' | 'employee',
+        role: canonicalRole,
+        displayRole: hrAccount.title || hrAccount.role,
         employeeId,
         departments: hrAccount.departments || ['All'],
+        branch: hrAccount.branch || 'All',
       };
       setUser(u);
-      setActiveRole(hrAccount.role as 'super_admin' | 'hr' | 'employee');
+      setActiveRole(canonicalRole);
       localStorage.setItem('ems_user', JSON.stringify(u));
       localStorage.setItem('ems_token', 'dummy');
       return true;

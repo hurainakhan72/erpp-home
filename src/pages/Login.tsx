@@ -72,7 +72,9 @@ export default function Login() {
         <div className="login-note">
           <strong>Demo Accounts:</strong>
           <div className="mono" style={{ fontSize: 10.5 }}>superadmin / admin123 → Super Admin</div>
-          <div className="mono" style={{ fontSize: 10.5 }}>hr1 / hr123 → HR</div>
+          <div className="mono" style={{ fontSize: 10.5 }}>headhr / head123 → Head HR</div>
+          <div className="mono" style={{ fontSize: 10.5 }}>branchhr / branch123 → Branch HR</div>
+          <div className="mono" style={{ fontSize: 10.5 }}>deptshr / depts123 → Department HR</div>
           <div className="mono" style={{ fontSize: 10.5 }}>emp001 / emp123 → Employee</div>
         </div>
       </div>

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { Search, LogOut, ShieldCheck as ShieldIcon, LayoutDashboard, Users, CalendarCheck, CalendarDays, DollarSign, TrendingUp, ScrollText, Settings, ClipboardList, Clock, CalendarRange, Bell, Zap, Wallet } from "lucide-react";
 import { useData } from "../../context/DataContext";
+import { getVisibleEmployees } from "../../utils/utils";
 
 const routeNames: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -38,7 +39,7 @@ const routeNames: Record<string, string> = {
 
 export default function Topbar() {
   const auth = useAuth(); // Poora object le rahe hain error se bachne ke liye
-  const { leaveRequests } = useData();
+  const { leaveRequests, employees } = useData();
   const location = useLocation();
   const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
@@ -70,8 +71,9 @@ export default function Topbar() {
   });
 
   // Role display logic
-  const displayRole = auth?.user?.role === 'super_admin' ? 'Super Admin' : 
-                      auth?.user?.role === 'hr' ? 'HR Module' : 'Employee';
+  const displayRole = auth?.user?.displayRole ||
+                      (auth?.user?.role === 'super_admin' ? 'Super Admin' : 
+                      auth?.user?.role === 'hr' ? 'HR Module' : 'Employee');
 
   const routeIcons: Record<string, any> = {
     '/launchpad': Zap,
@@ -108,7 +110,10 @@ export default function Topbar() {
 
   const currentIcon = routeIcons[location.pathname] || (location.pathname.startsWith('/settings/') ? Settings : LayoutDashboard);
   const PageIcon = currentIcon;
-  const notifications = leaveRequests.filter((item: any) => item.status === "Pending").slice(0, 5);
+
+  const visibleEmployees = getVisibleEmployees(auth.user, auth.activeRole, employees);
+  const visibleEmployeeIds = new Set(visibleEmployees.map(e => e.id));
+  const notifications = leaveRequests.filter((item: any) => item.status === "Pending" && visibleEmployeeIds.has(item.empId)).slice(0, 5);
 
   return (
     <div className="topbar">

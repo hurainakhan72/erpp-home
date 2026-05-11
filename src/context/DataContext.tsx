@@ -134,7 +134,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [promotions, setPromotions] = usePersisted('promotions', defaultPromotions);
   const [penalties, setPenalties] = usePersisted('penalties', defaultPenalties);
   const [auditLog, setAuditLog] = usePersisted('auditLog', defaultAuditLog);
-  const [hrAccounts, setHrAccounts] = usePersisted('hrAccounts', defaultHrAccounts);
+  const [hrAccounts, setHrAccounts] = useState(defaultHrAccounts);
   const [attendanceData, setAttendanceData] = usePersisted('attendanceData', defaultAttendance);
   const [allAttendanceToday, setAllAttendanceToday] = usePersisted('allAttendanceToday', defaultAttToday);
   const [attendanceLocks, setAttendanceLocks] = usePersisted<Record<string, AttendanceLock>>('attendanceLocks', {});

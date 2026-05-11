@@ -1,9 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { CheckCircle2, ShieldCheck, ShieldAlert } from "lucide-react";
 import { useData } from "../context/DataContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function HeadOfficeHR() {
   const { allAttendanceToday, attendanceLocks, setAttendanceLocks } = useData();
+  const { user, activeRole } = useAuth();
   const [selectedBranch, setSelectedBranch] = useState("Head Office");
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
 
@@ -12,9 +14,17 @@ export default function HeadOfficeHR() {
     return unique.length ? unique : ["Head Office"];
   }, [allAttendanceToday]);
 
+  const availableBranches = branches.filter(branch => {
+    if (activeRole === 'super_admin' || user.branch === 'All') return true;
+    return branch === user.branch;
+  });
+
   const rows = useMemo(
-    () => allAttendanceToday.filter((row: any) => (row.branch || "Head Office") === selectedBranch),
-    [allAttendanceToday, selectedBranch]
+    () => allAttendanceToday.filter((row: any) => 
+      (row.branch || "Head Office") === selectedBranch &&
+      (user.departments.includes('All') || user.departments.includes(row.dept || row.department))
+    ),
+    [allAttendanceToday, selectedBranch, user.departments]
   );
 
   const lockKey = `${selectedBranch}-${selectedDate}`;
@@ -96,7 +106,7 @@ export default function HeadOfficeHR() {
               value={selectedBranch}
               onChange={(e) => setSelectedBranch(e.target.value)}
             >
-              {branches.map((branch) => (
+              {availableBranches.map((branch) => (
                 <option key={branch} value={branch}>
                   {branch}
                 </option>

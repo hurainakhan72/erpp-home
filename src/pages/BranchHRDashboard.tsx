@@ -120,7 +120,7 @@ function RejectModal({ branch, onClose, onConfirm }: RejectModalProps) {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function BranchHRDashboard() {
-  const { activeRole } = useAuth();
+  const { activeRole, user } = useAuth();
   const { show: toast, ToastEl } = useToast();
 
   // Guard
@@ -146,36 +146,41 @@ export default function BranchHRDashboard() {
   const [showReject,     setShowReject]     = useState(false);
   const [workflowStep,   setWorkflowStep]   = useState(1); // 0=records done, 1=branch locking, 2=head verifies, 3=finalized
 
+  const availableBranches = BRANCHES.filter(branch => {
+    if (activeRole === 'super_admin' || user.branch === 'All') return true;
+    return branch.name === user.branch;
+  });
+
   useEffect(() => {
     const finalCount = Object.values(locks).filter(l => l.status === 'finalized').length;
-    if (finalCount === BRANCHES.length) setWorkflowStep(3);
+    if (finalCount === availableBranches.length) setWorkflowStep(3);
     else if (Object.values(locks).some(l => l.status === 'branch_locked')) setWorkflowStep(2);
     else setWorkflowStep(1);
-  }, [locks]);
+  }, [locks, availableBranches]);
 
   // ── Derived ───────────────────────────────────────────────────────────────
   const lockStats = useMemo(() => ({
-    total:     BRANCHES.length,
-    open:      Object.values(locks).filter(l => l.status === 'unlocked').length,
-    submitted: Object.values(locks).filter(l => l.status === 'branch_locked').length,
-    finalized: Object.values(locks).filter(l => l.status === 'finalized').length,
-    rejected:  Object.values(locks).filter(l => l.status === 'rejected').length,
-  }), [locks]);
+    total:     availableBranches.length,
+    open:      availableBranches.filter(b => locks[b.id]?.status === 'unlocked').length,
+    submitted: availableBranches.filter(b => locks[b.id]?.status === 'branch_locked').length,
+    finalized: availableBranches.filter(b => locks[b.id]?.status === 'finalized').length,
+    rejected:  availableBranches.filter(b => locks[b.id]?.status === 'rejected').length,
+  }), [locks, availableBranches]);
 
   const pendingCount = lockStats.submitted;
 
   const filteredBranches = useMemo(() => {
-    return BRANCHES.filter(b => {
+    return availableBranches.filter(b => {
       const lk = locks[b.id];
       if (branchFilter !== 'all' && lk?.status !== branchFilter) return false;
       if (searchTerm && !b.name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
       return true;
     });
-  }, [locks, branchFilter, searchTerm]);
+  }, [availableBranches, locks, branchFilter, searchTerm]);
 
-  const selectedBranch = BRANCHES.find(b => b.id === selectedId);
+  const selectedBranch = availableBranches.find(b => b.id === selectedId);
   const selectedLock   = selectedId ? locks[selectedId] : null;
-  const selectedEmps   = selectedId ? (EMP_DATA[selectedId] || []) : [];
+  const selectedEmps   = selectedId ? (EMP_DATA[selectedId] || []).filter(e => user.departments.includes('All') || user.departments.includes(e.dept)) : [];
 
   const filteredEmps = useMemo(() => {
     if (!empSearch.trim()) return selectedEmps;

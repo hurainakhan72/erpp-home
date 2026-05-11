@@ -8,6 +8,7 @@ import {
   ScrollText, LogOut, ChevronDown, ChevronRight, Zap
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
+import { getVisibleEmployees } from '../../utils/utils';
 
 type SidebarLink = {
   to: string;
@@ -18,7 +19,7 @@ type SidebarLink = {
 
 export default function Sidebar() {
   const { user, activeRole, logout } = useAuth();
-  const { allAttendanceToday, leaveRequests } = useData();
+  const { allAttendanceToday, leaveRequests, employees } = useData();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const location = useLocation();
   const isSettingsActive = location.pathname.startsWith('/settings');
@@ -76,7 +77,7 @@ export default function Sidebar() {
     { to: '/audit-log', icon: ScrollText, label: 'Audit Log' },
   ];
 
-  const mainLinks = activeRole === 'super_admin' ? superAdminLinks : hrLinks;
+  const mainLinks = activeRole === 'super_admin' || (activeRole === 'hr' && user?.branch === 'All') ? superAdminLinks : hrLinks;
 
   const settingsLinks = [
     { to: '/settings/departments', label: 'Departments' },
@@ -101,13 +102,18 @@ export default function Sidebar() {
     { to: '/settings/custom-fields', icon: FormInput, label: 'Custom Fields' },
   ];
 
-  const liveAttendance = useMemo(() => {
-    const total = allAttendanceToday.length || 1;
-    const present = allAttendanceToday.filter((row: any) => row.status === 'Present').length;
-    return Math.round((present / total) * 100);
-  }, [allAttendanceToday]);
+  const visibleEmployees = getVisibleEmployees(user, activeRole, employees);
+  const visibleEmployeeIds = new Set(visibleEmployees.map(e => e.id));
 
-  const pendingLeave = leaveRequests.filter((row: any) => row.status === 'Pending').length;
+  const visibleAttendanceToday = allAttendanceToday.filter((row: any) => visibleEmployeeIds.has(row.empId));
+
+  const liveAttendance = useMemo(() => {
+    const total = visibleAttendanceToday.length || 1;
+    const present = visibleAttendanceToday.filter((row: any) => row.status === 'Present').length;
+    return Math.round((present / total) * 100);
+  }, [visibleAttendanceToday]);
+
+  const pendingLeave = leaveRequests.filter((row: any) => row.status === 'Pending' && visibleEmployeeIds.has(row.empId)).length;
 
   return (
     <div className="sidebar">
@@ -154,7 +160,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {activeRole === 'super_admin' && (
+      {(activeRole === 'super_admin' || (activeRole === 'hr' && user?.branch === 'All')) && (
         <>
           <div className="sb-div" />
           <div className="sb-sec">
@@ -188,14 +194,14 @@ export default function Sidebar() {
       <div className="sb-sec">
         <div className="sb-lbl">Workflow Role</div>
         <div style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--t2)', padding: 12, borderRadius: 12, background: 'rgba(148,163,184,.08)' }}>
-          {activeRole === 'super_admin' && (
+          {(activeRole === 'super_admin' || (activeRole === 'hr' && user?.branch === 'All')) && (
             <>
               Super Admin oversees all systems: branch data prep, head HR approvals, configurations, and final reports.
               <br />
               All HR workflow pages and accounts are visible here for complete oversight.
             </>
           )}
-          {activeRole === 'hr' && (
+          {activeRole === 'hr' && user?.branch !== 'All' && (
             <>
               HR executes the approval workflow: Branch HR locks and prepares data, Head HR reviews and approves/rejects.
               <br />
