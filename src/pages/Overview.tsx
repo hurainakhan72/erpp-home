@@ -9,8 +9,8 @@ import { BRANCHES, EMP_DATA, INITIAL_LOCKS, nameGrad, getIni, SHARED_CSS } from 
 export default function OverviewPage() {
   const { activeRole } = useAuth();
 
-  // Guard: only SuperAdmin and HR can see this
-  if (activeRole !== 'super_admin' && activeRole !== 'hr') {
+  // Guard: only SuperAdmin and Head HR can see this
+  if (activeRole !== 'super_admin' && activeRole !== 'head_hr') {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#94a3b8', flexDirection: 'column', gap: 12 }}>
         <span style={{ fontSize: 40 }}>🔒</span>

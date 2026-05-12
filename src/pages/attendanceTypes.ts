@@ -128,6 +128,10 @@ export const SHARED_CSS = `
   .btn-ghost { background: #fff; color: #374151; border-color: #e5e7eb; }
   .btn-green { background: #10b981; color: #fff; border-color: #10b981; }
   .btn-red { background: #ef4444; color: #fff; border-color: #ef4444; }
+  /* Additional button variants used across Branch HR pages */
+  .btn-on-gradient { background: rgba(255,255,255,.15); color: #fff; border-color: rgba(255,255,255,.2); }
+  .btn-danger { background: rgba(239,68,68,.85); color: #fff; border: none; }
+  .btn-success { background: rgba(16,185,129,.9); color: #fff; border: none; }
   .card { background: #fff; border-radius: 18px; border: 1px solid #e5e7eb; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06); overflow: hidden; }
   .card-header { padding: 16px 20px; border-bottom: 1px solid #eef2ff; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
   .card-title { font-size: 14px; font-weight: 700; color: #111827; }

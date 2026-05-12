@@ -71,11 +71,11 @@ export default function Login() {
         </form>
         <div className="login-note">
           <strong>📋 Demo Accounts (5 Roles):</strong>
-          <div className="mono" style={{ fontSize: 11.5, color: '#000000' }}>superadmin / admin123 → Superadmin (Full Access)</div>
-          <div className="mono" style={{ fontSize: 11.5, color: '#000000' }}>head_hr / headhr123 → Head HR (All Company)</div>
-          <div className="mono" style={{ fontSize: 11.5, color: '#000000' }}>branch_hr_ho / branch123 → Branch HR (Head Office)</div>
-          <div className="mono" style={{ fontSize: 11.5, color: '#000000' }}>dept_hr_eng / dept123 → Dept HR (Engineering)</div>
-          <div className="mono" style={{ fontSize: 11.5, color: '#000000' }}>emp_001 / emp123 → Employee (Personal Data)</div>
+          <div className="mono" style={{ fontSize: 11.5, color: '#000000' }}>superadmin / admin123 → Superadmin </div>
+          <div className="mono" style={{ fontSize: 11.5, color: '#000000' }}>head_hr / headhr123 → Head HR </div>
+          <div className="mono" style={{ fontSize: 11.5, color: '#000000' }}>branch_hr_ho / branch123 → Branch HR </div>
+          <div className="mono" style={{ fontSize: 11.5, color: '#000000' }}>dept_hr_mark / dept123 → Dept HR </div>
+          <div className="mono" style={{ fontSize: 11.5, color: '#000000' }}>emp_001 / emp123 → Employee </div>
         </div>
       </div>
     </div>

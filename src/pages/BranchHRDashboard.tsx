@@ -8,8 +8,16 @@ import {
   BRANCHES, EMP_DATA, INITIAL_LOCKS, INITIAL_REPORTS,
   nameGrad, getIni, SHARED_CSS,
   Branch, EmpRecord, LockState, LockStatus, SavedReport,
-  STATUS_CFG, SHIFT_STYLE, STATUS_STYLE,
+  SHIFT_STYLE, STATUS_STYLE,
 } from './attendanceTypes';
+
+// Lock status configuration (visuals for branch lock state)
+const LOCK_STATUS_CFG: Record<string, { label: string; color: string; bg: string; border: string; pillClass: string; icon: string }> = {
+  unlocked:    { label: 'Open',       color: '#4f46e5', bg: '#eef2ff', border: '#c7d2fe', pillClass: 'pill-indigo', icon: '📝' },
+  branch_locked:{ label: 'Submitted', color: '#d97706', bg: '#fef3c7', border: '#fcd34d', pillClass: 'pill-amber', icon: '🔒' },
+  finalized:   { label: 'Finalized',  color: '#059669', bg: '#d1fae5', border: '#6ee7b7', pillClass: 'pill-green', icon: '✅' },
+  rejected:    { label: 'Sent Back',  color: '#dc2626', bg: '#fee2e2', border: '#fca5a5', pillClass: 'pill-red', icon: '↩️' },
+};
 
 // ── Small reusable Toast ──────────────────────────────────────────────────────
 function useToast() {
@@ -124,7 +132,7 @@ export default function BranchHRDashboard() {
   const { show: toast, ToastEl } = useToast();
 
   // Guard
-  if (activeRole !== 'super_admin' && activeRole !== 'hr') {
+  if (activeRole !== 'super_admin' && activeRole !== 'head_hr') {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', flexDirection: 'column', gap: 12, color: '#94a3b8' }}>
         <span style={{ fontSize: 40 }}>🔒</span>
@@ -356,7 +364,7 @@ export default function BranchHRDashboard() {
             </div>
           ) : filteredBranches.map(b => {
             const lk  = locks[b.id] || { status: 'unlocked' };
-            const cfg = STATUS_CFG[lk.status as LockStatus];
+            const cfg = LOCK_STATUS_CFG[lk.status as LockStatus];
             const emps = EMP_DATA[b.id] || [];
             const pres = emps.filter(e => e.status === 'Present').length;
             const late = emps.filter(e => e.status === 'Late').length;
@@ -408,33 +416,13 @@ export default function BranchHRDashboard() {
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     {selectedLock.status === 'branch_locked' && (
                       <>
-                        <button
-                          className="btn"
-                          style={{ background: 'rgba(255,255,255,.15)', color: '#fff', borderColor: 'rgba(255,255,255,.2)' }}
-                          onClick={() => exportBranch(selectedId!)}>
-                          📤 Export
-                        </button>
-                        <button
-                          className="btn"
-                          style={{ background: 'rgba(239,68,68,.85)', color: '#fff', border: 'none' }}
-                          onClick={() => setShowReject(true)}>
-                          ↩️ Send Back
-                        </button>
-                        <button
-                          className="btn"
-                          style={{ background: 'rgba(16,185,129,.9)', color: '#fff', border: 'none' }}
-                          onClick={() => setShowVerify(true)}>
-                          ✅ Verify & Accept
-                        </button>
+                        <button className="btn btn-on-gradient" onClick={() => exportBranch(selectedId!)}>📤 Export</button>
+                        <button className="btn btn-danger" onClick={() => setShowReject(true)}>↩️ Send Back</button>
+                        <button className="btn btn-success" onClick={() => setShowVerify(true)}>✅ Verify & Accept</button>
                       </>
                     )}
                     {selectedLock.status === 'finalized' && (
-                      <button
-                        className="btn"
-                        style={{ background: 'rgba(255,255,255,.15)', color: '#fff', borderColor: 'rgba(255,255,255,.2)' }}
-                        onClick={() => exportBranch(selectedId!)}>
-                        📤 Export Report
-                      </button>
+                      <button className="btn btn-on-gradient" onClick={() => exportBranch(selectedId!)}>📤 Export Report</button>
                     )}
                     {(selectedLock.status === 'unlocked' || selectedLock.status === 'rejected') && (
                       <span style={{ fontSize: 11, color: 'rgba(255,255,255,.6)', padding: '6px 10px' }}>
@@ -448,7 +436,7 @@ export default function BranchHRDashboard() {
               <div className="card-body">
                 {/* Status Banner */}
                 {(() => {
-                  const cfg = STATUS_CFG[selectedLock.status as LockStatus];
+                  const cfg = LOCK_STATUS_CFG[selectedLock.status as LockStatus];
                   let info = '';
                   if (selectedLock.status === 'branch_locked') info = `Locked by <strong>${selectedLock.lockedBy}</strong> at <strong>${selectedLock.lockedAt}</strong> · Awaiting Head HR verification`;
                   else if (selectedLock.status === 'finalized') info = `✅ Verified by <strong>${selectedLock.verifiedBy}</strong> at <strong>${selectedLock.verifiedAt}</strong> · Report saved`;

@@ -142,7 +142,7 @@ export default function SavedReports() {
   const { show: toast, ToastEl } = useToast();
 
   // Guard
-  if (activeRole !== 'super_admin' && activeRole !== 'hr') {
+  if (activeRole !== 'super_admin' && activeRole !== 'head_hr') {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', flexDirection: 'column', gap: 12, color: '#94a3b8' }}>
         <span style={{ fontSize: 40 }}>🔒</span>

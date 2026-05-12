@@ -67,7 +67,7 @@ const Chip = ({ bg, fg, children }: { bg:string; fg:string; children:React.React
 
 const Prog = ({ pct, color }: { pct:number; color:string }) => (
   <div style={{height:5,background:"#f1f5f9",borderRadius:4,overflow:"hidden",marginTop:5}}>
-    <div style={{height:"100%",width:`${Math.min(pct,100)}%`,background:color,borderRadius:4,transition:"width .8s ease"}}/>
+    <div style={{height:"100%", width: `${Math.min(pct,100)}%`, background: color, borderRadius:4, transition:"width .8s ease"}}/>
   </div>
 );
 
@@ -77,8 +77,8 @@ const Av = ({ ini, color, size=32 }: { ini:string; color:string; size?:number })
   </div>
 );
 
-const WCard = ({ children, style }: { children:React.ReactNode; style?:React.CSSProperties }) => (
-  <div className="fc" style={{background:"#fff",borderRadius:16,padding:"18px 20px",boxShadow:"0 1px 10px rgba(0,0,0,.07)",...style}}>
+const WCard = ({ children, style, onClick }: { children:React.ReactNode; style?:React.CSSProperties; onClick?:() => void }) => (
+  <div className="fc" onClick={onClick} style={{background:"#fff",borderRadius:16,padding:"18px 20px",boxShadow:"0 1px 10px rgba(0,0,0,.07)",...style, cursor: onClick ? 'pointer' : 'default'}}>
     {children}
   </div>
 );
@@ -97,6 +97,14 @@ export default function Dashboard() {
   const { leaveRequests, employees, globalDays } = useData();
   const navigate = useNavigate();
 
+  const [selectedBranch, setSelectedBranch] = useState<string>('All');
+
+  const branches = useMemo(() => {
+    const s = new Set<string>();
+    employees?.forEach((e:any) => { if (e.branch) s.add(e.branch); });
+    return ['All', ...Array.from(s)];
+  }, [employees]);
+
   const [now, setNow] = useState(new Date());
   const [showNotif, setShowNotif] = useState(false);
   const [hovCard, setHovCard] = useState<number|null>(null);
@@ -109,9 +117,15 @@ export default function Dashboard() {
 
   const visibleEmployees = useMemo(() => getVisibleEmployees(user, activeRole, employees), [user, activeRole, employees]);
 
+  const filteredEmployees = useMemo(() => {
+    if (!visibleEmployees) return [];
+    if (selectedBranch === 'All') return visibleEmployees;
+    return visibleEmployees.filter((e:any) => (e.branch || '') === selectedBranch);
+  }, [visibleEmployees, selectedBranch]);
+
   const deptData = useMemo(() => {
     const deptCounts: Record<string, number> = {};
-    visibleEmployees.forEach(emp => {
+    filteredEmployees.forEach(emp => {
       deptCounts[emp.department] = (deptCounts[emp.department] || 0) + 1;
     });
     return Object.entries(deptCounts).map(([name, value], i) => ({
@@ -119,12 +133,12 @@ export default function Dashboard() {
       value,
       color: AV_COLORS[i % AV_COLORS.length]
     }));
-  }, [visibleEmployees]);
+  }, [filteredEmployees]);
 
   // ── Real data ──
-  const totalEmp = visibleEmployees?.length ?? 0;
-  const activeEmp = visibleEmployees?.filter((e:any) => e.status === "active").length ?? 0;
-  const visibleEmployeeIds = new Set(visibleEmployees.map((e:any) => e.id));
+  const totalEmp = filteredEmployees?.length ?? 0;
+  const activeEmp = filteredEmployees?.filter((e:any) => e.status === "active").length ?? 0;
+  const visibleEmployeeIds = new Set(filteredEmployees.map((e:any) => e.id));
   const visibleLeaveRequests = useMemo(
     () => leaveRequests?.filter((l:any) => visibleEmployeeIds.has(l.empId)) || [],
     [leaveRequests, visibleEmployeeIds],
@@ -190,13 +204,19 @@ export default function Dashboard() {
 
   // ── Notifications ──
   const notifs = [
-    {id:1,title:"Leave Request Pending",  msg:`${pendingLv} requests awaiting approval`, time:"Just now",   link:"/leave", read:false},
+    {id:1,title:"Leave Request Pending",  msg: `${pendingLv} requests awaiting approval`, time:"Just now",   link:"/leave", read:false},
     {id:2,title:"Incomplete Attendance",  msg:"3 employees haven't marked attendance today", time:"2 hrs ago", link:"/attendance", read:false},
     {id:3,title:"Contract Expiry Alert",  msg:"Usman Malik's contract expires in 8 days", time:"Yesterday", link:"/employees", read:false},
     {id:4,title:"New Employee Onboarded", msg:"Bilal Ahmed added successfully", time:"Yesterday", link:"/employees", read:true},
     {id:5,title:"Probation Period Ending",msg:"Fatima Raza's probation ends in 12 days", time:"2 days ago", link:"/employees", read:true},
   ];
   const unread = notifs.filter(n=>!n.read).length;
+
+  // Merge calendar/globalDays into announcements so additions in Calendar appear here
+  const combinedAnnouncements = useMemo(() => {
+    const fromDays = (globalDays || []).map((g:any) => ({ title: g.title || g.type, date: g.date, text: g.banner_message || '', id: g.id }));
+    return [...ANNOUNCEMENTS, ...fromDays];
+  }, [globalDays]);
 
   // ── Hero cards ──
   const hCards = [
@@ -215,7 +235,7 @@ export default function Dashboard() {
 
   // ── Pending actions ──
   const actions = [
-    {emoji:"📋", text:`${pendingLv||2} leave requests awaiting approval`, cta:"Review →", link:"/leave"},
+    {emoji:"📋", text: `${pendingLv||2} leave requests awaiting approval`, cta:"Review →", link:"/leave"},
     {emoji:"⏰", text:"Attendance incomplete — 3 employees", cta:"Mark →", link:"/attendance"},
     {emoji:"🏦", text:"Bank info missing — EMP004, EMP005", cta:"Fix →", link:"/employees"},
   ];
@@ -246,20 +266,21 @@ export default function Dashboard() {
     ];
     const source = visibleEmployees?.length ? visibleEmployees : employees;
     if (!source?.length) return fallback;
-    return source.slice(0,4).map((e:any,i:number) => ({
+    const src = filteredEmployees?.length ? filteredEmployees : employees;
+    return src.slice(0,4).map((e:any,i:number) => ({
       name: e.name || "—",
       dept: e.department || "—",
       score: 88 + Math.floor((i*3.5)%11),
       ini: (e.name||"?").split(" ").map((n:string)=>n[0]).join("").slice(0,2).toUpperCase(),
       color: AV_COLORS[i % AV_COLORS.length],
     }));
-  }, [visibleEmployees, employees]);
+  }, [filteredEmployees, employees]);
 
   // ── Upcoming birthdays (integrated with calendar) ──
   const birthdays = useMemo(() => {
     const today = new Date(); today.setHours(0,0,0,0);
     const list: {name:string; dept:string; date:Date; daysUntil:number; ini:string; color:string}[] = [];
-    visibleEmployees?.forEach((emp:any, idx:number) => {
+    filteredEmployees?.forEach((emp:any, idx:number) => {
       if (!emp.dob) return;
       const dob = new Date(emp.dob);
       let bday = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
@@ -277,7 +298,7 @@ export default function Dashboard() {
       }
     });
     return list.sort((a,b) => a.daysUntil - b.daysUntil);
-  }, [visibleEmployees]);
+  }, [filteredEmployees]);
 
   // ─────────────────────────────────────────────────────────────────────────────
   return (
@@ -351,7 +372,7 @@ export default function Dashboard() {
 
         {/* ══ 3 HERO CARDS ════════════════════════════════════════════════════ */}
         <div style={{display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:14, marginBottom:18}}>
-          {hCards.map((c,i)=>(
+            {hCards.map((c,i)=>(
             <div key={i} className="hc"
               style={{background:c.grad, borderRadius:18, padding:"20px", color:"#fff", position:"relative", overflow:"hidden", minHeight:130, boxShadow: hovCard===i ? `0 20px 44px ${c.glow}` : "0 6px 20px rgba(0,0,0,.10)"}}
               onClick={()=>navigate(c.link)}
@@ -366,7 +387,7 @@ export default function Dashboard() {
               <span style={{position:"absolute", top:14, right:14, background:"rgba(255,255,255,.22)", borderRadius:20, padding:"3px 9px", fontSize:9, fontWeight:700}}>{c.chip}</span>
               <div style={{position:"absolute", width:80, height:80, borderRadius:"50%", background:"rgba(255,255,255,.07)", bottom:-18, right:-18}}/>
               <div style={{position:"absolute", width:48, height:48, borderRadius:"50%", background:"rgba(255,255,255,.06)", bottom:20, right:28}}/>
-              <div style={{position:"absolute", bottom:12, right:14, fontSize:9, opacity:.5, display:"flex", alignItems:"center", gap:3}}>View <span style={{fontSize:11}}>↗</span></div>
+              <div style={{position:"absolute", bottom:12, right:14, fontSize:9, opacity:.5, display:"flex", alignItems:"center", gap:3}}>View <span style={{fontSize:11}}>↗️</span></div>
             </div>
           ))}
         </div>
@@ -390,8 +411,15 @@ export default function Dashboard() {
 
         {/* ══ CHARTS ROW: Attendance + Dept donut ════════════════════════════ */}
         <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:14, marginBottom:14}}>
-          <WCard>
-            <SHead icon={<BarChart3 size={14} color="#6366f1"/>} title="Monthly Attendance" right={<Chip bg="#dcfce7" fg="#166534">↗ +5.2%</Chip>}/>
+          <WCard onClick={() => navigate('/attendance')}>
+            <SHead icon={<BarChart3 size={14} color="#6366f1"/>} title="Monthly Attendance" right={<div style={{display:'flex',alignItems:'center',gap:8}}>
+                {(activeRole === 'super_admin' || activeRole === 'head_hr') && (
+                  <select value={selectedBranch} onChange={(e)=>setSelectedBranch(e.target.value)} style={{padding:'6px 8px',borderRadius:8,border:'1px solid #e5e7eb',fontSize:12}}>
+                    {branches.map(b=> <option key={b} value={b}>{b}</option>)}
+                  </select>
+                )}
+                <Chip bg="#dcfce7" fg="#166534">↗️ +5.2%</Chip>
+              </div>} />
             <p style={{margin:"-10px 0 10px", fontSize:10, color:"#9ca3af"}}>Present vs Absent · Last 6 months</p>
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={attendanceChartData} barGap={3}>
@@ -405,7 +433,7 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </WCard>
 
-          <WCard>
+          <WCard onClick={() => navigate('/employees')}>
             <SHead icon={<Users size={14} color="#a855f7"/>} title="Department Distribution"/>
             <p style={{margin:"-10px 0 12px", fontSize:10, color:"#9ca3af"}}>Headcount by department</p>
             <div style={{display:"flex", gap:14, alignItems:"center"}}>
@@ -438,7 +466,7 @@ export default function Dashboard() {
 
         {/* ══ CHARTS ROW 2: Headcount growth + Leave breakdown ═══════════════ */}
         <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:14, marginBottom:14}}>
-          <WCard>
+          <WCard onClick={() => navigate('/employees')}>
             <SHead icon={<TrendingUp size={14} color="#10b981"/>} title="Headcount Growth" right={<span style={{fontSize:12, fontWeight:800, color:"#10b981"}}>260 ↑</span>}/>
             <ResponsiveContainer width="100%" height={185}>
               <AreaChart data={growthData}>
@@ -452,7 +480,7 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </WCard>
 
-          <WCard>
+          <WCard onClick={() => navigate('/leave')}>
             <SHead icon={<FileText size={14} color="#f97316"/>} title="Leave Breakdown" right={pendingLv>0 ? <Chip bg="#fef3c7" fg="#d97706">{pendingLv} Pending</Chip> : undefined}/>
             <div style={{display:"flex", gap:16, alignItems:"center"}}>
               <div style={{position:"relative", width:130, height:130, flexShrink:0}}>
@@ -533,7 +561,7 @@ export default function Dashboard() {
 
           <WCard>
             <SHead icon={<Megaphone size={14} color="#f59e0b"/>} title="Announcements"/>
-            {ANNOUNCEMENTS.map((a,i)=>(
+            {combinedAnnouncements.map((a:any,i:number)=>(
               <div key={i} style={{padding:"10px 0", borderBottom:i<ANNOUNCEMENTS.length-1?"1px solid #f3f4f6":"none"}}>
                 <div style={{display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8}}><span style={{fontSize:12, fontWeight:600, color:"#1e1b4b", lineHeight:1.3}}>{a.title}</span><span style={{fontSize:9, color:"#d1d5db", whiteSpace:"nowrap", marginTop:2}}>{a.date}</span></div>
                 <p style={{margin:"4px 0 0", fontSize:10, color:"#9ca3af", lineHeight:1.55}}>{a.text}</p>
@@ -546,7 +574,7 @@ export default function Dashboard() {
         <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:14}}>
 
           {/* Calendar - Exactly same size as other cards */}
-          <WCard>
+          <WCard onClick={() => navigate('/calendar')}>
             <SHead 
               icon={<CalendarDays size={14} color="#6366f1" />} 
               title="Calendar — Events" 
@@ -610,7 +638,7 @@ export default function Dashboard() {
                       color: b.daysUntil <= 3 ? "#fff" : "#6366f1",
                       padding: "3px 8px", borderRadius: 16, fontSize: 9, fontWeight: 600, whiteSpace: "nowrap", flexShrink: 0,
                     }}>
-                      {b.daysUntil === 0 ? "Today" : b.daysUntil === 1 ? "Tomorrow" : `${b.daysUntil}d`}
+                        {b.daysUntil === 0 ? "Today" : b.daysUntil === 1 ? "Tomorrow" : `${b.daysUntil}d`}
                     </div>
                   </div>
                 ))}

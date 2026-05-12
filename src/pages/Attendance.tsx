@@ -78,17 +78,29 @@ const Attendance = () => {
   const [modalOut, setModalOut] = useState<string>('18:00');
 
   useEffect(() => {
-    if (activeRole === 'super_admin') {
+    // Treat Head HR as SuperAdmin for the attendance view so they see the same master layout
+    if (activeRole === 'super_admin' || activeRole === 'head_hr') {
       setActiveTab('sa');
-    } else if (activeRole === 'hr') {
+    } else if (activeRole === 'hr' || activeRole === 'branch_hr' || activeRole === 'dept_hr') {
       setActiveTab('hr');
     } else {
       setActiveTab('emp');
     }
   }, [activeRole]);
 
-  const isSuperAdmin = activeRole === 'super_admin';
-  const isHR = activeRole === 'hr';
+  // If Department HR, pre-filter to their department and keep selection locked
+  useEffect(() => {
+    if (activeRole === 'department_hr' || activeRole === 'dept_hr') {
+      const dept = (user?.departments && user.departments[0]) || 'All Departments';
+      setDeptFilter(dept);
+    }
+    if (activeRole === 'branch_hr' && user?.branch) {
+      setDeptFilter('All Departments');
+    }
+  }, [activeRole, user]);
+
+  const isSuperAdmin = activeRole === 'super_admin' || activeRole === 'head_hr';
+  const isHR = activeRole === 'hr' || activeRole === 'branch_hr' || activeRole === 'dept_hr';
   const isEmployee = activeRole === 'employee';
 
   const allowedTabs = useMemo(() => {
@@ -119,8 +131,26 @@ const Attendance = () => {
     return attendanceRows[0];
   }, [attendanceRows, isEmployee, user]);
 
+  // Determine which attendance rows the current user is allowed to see
+  const visibleRows = useMemo(() => {
+    if (isSuperAdmin) return attendanceRows; // full company
+    if (activeRole === 'branch_hr') {
+      // branch_hr sees records for their branch (if data has branch field)
+      if (user?.branch) return attendanceRows.filter((emp: any) => emp.branch === user.branch || !emp.branch);
+      return attendanceRows;
+    }
+    if (activeRole === 'department_hr' || activeRole === 'dept_hr') {
+      const depts = user?.departments || [];
+      if (depts.includes('All')) return attendanceRows;
+      return attendanceRows.filter((emp) => depts.includes(emp.dept));
+    }
+    if (isHR) return attendanceRows; // generic HR fallback
+    if (isEmployee && user?.employeeId) return attendanceRows.filter((emp) => emp.code === user.employeeId);
+    return attendanceRows;
+  }, [attendanceRows, activeRole, user, isSuperAdmin, isHR, isEmployee]);
+
   const filteredSA = useMemo(() => {
-    return attendanceRows.filter((emp) => {
+    return visibleRows.filter((emp) => {
       if (deptFilter !== 'All Departments' && emp.dept !== deptFilter) return false;
       if (mgrFilter !== 'All Managers' && emp.mgr !== mgrFilter) return false;
       if (statusFilter !== 'All Status' && emp.status !== statusFilter) return false;
@@ -131,9 +161,9 @@ const Attendance = () => {
       }
       return true;
     });
-  }, [attendanceRows, deptFilter, mgrFilter, statusFilter, searchTerm, saStatFilter]);
+  }, [visibleRows, deptFilter, mgrFilter, statusFilter, searchTerm, saStatFilter]);
 
-  const hrEmployees = useMemo(() => attendanceRows.filter((emp) => emp.dept === HR_DEPT), [attendanceRows]);
+  const hrEmployees = useMemo(() => visibleRows, [visibleRows]);
 
   const filteredHR = useMemo(() => {
     return hrEmployees.filter((emp) => {
@@ -506,8 +536,8 @@ const Attendance = () => {
             <div className="hrhead">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
                 <div>
-                  <div className="hrtitle">Daily Attendance</div>
-                  <div className="hrsub">{formattedDate} <span style={{ background: 'rgba(255,255,255,.2)', padding: '1px 9px', borderRadius: 20, fontSize: 10 }}>IT Department</span></div>
+                    <div className="hrtitle">Daily Attendance</div>
+                    <div className="hrsub">{formattedDate} <span style={{ background: 'rgba(255,255,255,.2)', padding: '1px 9px', borderRadius: 20, fontSize: 10 }}>{(user?.departments && user.departments[0]) || 'Department' } Department</span></div>
                 </div>
                 <div style={{ display: 'flex', gap: 6 }}>
                   <button className="btn" style={{ background: 'rgba(255,255,255,.2)', border: 'none', color: '#fff' }} type="button">📤 Export</button>

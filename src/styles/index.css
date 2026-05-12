@@ -349,6 +349,8 @@ body {
 .btn-secondary:hover { border-color: var(--p3); color: var(--p3); background: #dbeeff; }
 .btn-danger { background: var(--redl); color: var(--red); border: 1px solid rgba(183,28,28,.18); }
 .btn-danger:hover { background: var(--redd); }
+.btn-on-gradient { background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.2); box-shadow: none; }
+.btn-success { background: rgba(16,185,129,.9); color: #fff; border: none; }
 .btn-ghost { background: var(--nav); color: var(--t2); border: 1.5px solid var(--br); box-shadow: var(--sh); }
 .btn-ghost:hover { border-color: var(--p2); color: var(--p); background: var(--pl); }
 .btn-sm { padding: 5px 10px; font-size: 11px; }
