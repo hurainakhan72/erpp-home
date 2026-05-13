@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, X } from 'lucide-react';
+import { useData } from '../context/DataContext';
 
 interface CalendarEvent {
   id: string;
@@ -60,6 +61,7 @@ const eventTypeColors = {
 
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const { globalDays, setGlobalDays } = useData();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -68,24 +70,39 @@ export default function Calendar() {
   const [newType, setNewType] = useState<CalendarEvent['type']>('holiday');
   const [newDescription, setNewDescription] = useState('');
 
+  // Sync events with DataContext.globalDays so Calendar and Dashboard remain in sync
   useEffect(() => {
-    const stored = localStorage.getItem('calendar-events');
-    if (stored) {
-      try {
-        setEvents(JSON.parse(stored));
-      } catch {
-        setEvents(defaultEvents);
-      }
+    if (globalDays && globalDays.length) {
+      const mapped = globalDays.map((g: any) => ({
+        id: g.id,
+        title: g.title || g.type,
+        date: g.date,
+        type: (g.type as CalendarEvent['type']) || 'other',
+        description: g.banner_message || '',
+        createdBy: g.created_by || 'system',
+        isActive: g.is_active !== false,
+      }));
+      setEvents(mapped);
+      try { localStorage.setItem('calendar-events', JSON.stringify(mapped)); } catch {}
     } else {
+      // Initialize DataContext with default events if empty
+      const init = defaultEvents.map(e => ({
+        id: `GD-${e.id}`,
+        title: e.title,
+        date: e.date,
+        type: e.type,
+        banner_message: e.description || '',
+        created_by: e.createdBy,
+        created_at: new Date().toISOString(),
+        is_active: true,
+      }));
+      setGlobalDays?.((prev: any[]) => {
+        if (!prev || prev.length === 0) return init;
+        return prev;
+      });
       setEvents(defaultEvents);
     }
-  }, []);
-
-  useEffect(() => {
-    if (events.length) {
-      localStorage.setItem('calendar-events', JSON.stringify(events));
-    }
-  }, [events]);
+  }, [globalDays, setGlobalDays]);
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -154,17 +171,20 @@ export default function Calendar() {
     : [];
 
   const createEvent = () => {
-    const newEvent: CalendarEvent = {
-      id: `CE-${Date.now()}`,
+    const gd = {
+      id: `GD-${Date.now()}`,
       title: newTitle.trim() || 'New calendar event',
       date: newDate,
       type: newType,
-      description: newDescription.trim(),
-      createdBy: 'Local HR',
-      isActive: true,
+      affects_attendance: false,
+      show_banner: false,
+      banner_message: newDescription.trim(),
+      created_by: 'Local HR',
+      created_at: new Date().toISOString(),
+      is_active: true,
     };
 
-    setEvents((prev) => [...prev, newEvent]);
+    setGlobalDays?.((prev:any[]) => [...(prev||[]), gd]);
     setIsCreateOpen(false);
     setNewTitle('');
     setNewDescription('');

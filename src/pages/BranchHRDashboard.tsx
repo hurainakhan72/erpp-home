@@ -161,6 +161,46 @@ export default function BranchHRDashboard() {
     else setWorkflowStep(1);
   }, [locks]);
 
+  // Listen for sheet submissions from branch HR UI
+  useEffect(() => {
+    const handler = (e: Event) => {
+      try {
+        const ev: any = e as any;
+        const d = ev.detail;
+        if (!d || !d.branchId) return;
+        const now = new Date().toLocaleString('en-PK', { hour12: false }).slice(0, 16);
+
+        setLocks(p => ({
+          ...p,
+          [d.branchId]: { ...(p[d.branchId] || { lockedBy: '' }), status: 'branch_locked', lockedBy: d.lockedBy || 'Branch HR', lockedAt: now }
+        }));
+
+        const rep: SavedReport = {
+          id: 'r' + Date.now(),
+          branch: d.branchName || d.branchId,
+          date: d.date || new Date().toISOString().split('T')[0],
+          lockedBy: d.lockedBy || '',
+          verifiedBy: '',
+          verifiedAt: '',
+          empCount: Array.isArray(d.data) ? d.data.length : 0,
+          data: d.data || [],
+        };
+
+        setReports(p => {
+          const idx = p.findIndex(r => r.branch === rep.branch && r.date === rep.date);
+          return idx >= 0 ? p.map((r, i) => i === idx ? rep : r) : [...p, rep];
+        });
+
+        toast(`${rep.branch} — sheet submitted by ${rep.lockedBy}`, 'success');
+      } catch (err) {
+        // ignore
+      }
+    };
+
+    window.addEventListener('attendanceSheetSubmitted', handler as EventListener);
+    return () => window.removeEventListener('attendanceSheetSubmitted', handler as EventListener);
+  }, [setLocks, setReports, toast]);
+
   // ── Derived ───────────────────────────────────────────────────────────────
   const lockStats = useMemo(() => ({
     total:     BRANCHES.length,

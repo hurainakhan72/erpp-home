@@ -135,7 +135,9 @@ const App = () => (
                 <Route path="/calendar" element={<Calendar />} />
                 
                 {/* HR Workflow Pages: Branch HR executes, SuperAdmin watches */}
-                <Route path="/hr/branch-dashboard" element={<BranchHRDashboard />} />
+                <Route element={<ProtectedRoute allowedRoles={["super_admin", "head_hr"]} />}>
+                  <Route path="/hr/branch-dashboard" element={<BranchHRDashboard />} />
+                </Route>
                 <Route path="/attendance-verification" element={<AttendanceVerification />} />
                 <Route path="/attendance-head-review" element={<HeadOfficeHR />} />
                 <Route path="/overview" element={<OverviewPage />} />
@@ -162,8 +164,8 @@ const App = () => (
                 <Route path="/settings/tax-config" element={<TaxConfigPage />} />
                 <Route path="/settings/global-days" element={<GlobalDaysPage />} />
                 
-                {/* SuperAdmin Only */}
-                <Route element={<ProtectedRoute allowedRoles={["super_admin"]} />}>
+                {/* SuperAdmin + Head HR Only */}
+                <Route element={<ProtectedRoute allowedRoles={["super_admin", "head_hr"]} />}>
                   <Route path="/accounts" element={<Accounts />} />
                   <Route path="/audit-log" element={<AuditLog />} />
                   <Route path="/settings/custom-fields" element={<CustomFields />} />

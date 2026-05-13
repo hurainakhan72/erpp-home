@@ -149,6 +149,7 @@ export default function AddEmployee() {
   };
 
   const [fullName, setFullName] = useState('');
+  const [employeeIdInput, setEmployeeIdInput] = useState('');
   const [fatherName, setFatherName] = useState('');
   const [cnic, setCnic] = useState('');
   const [dob, setDob] = useState('');
@@ -173,6 +174,8 @@ export default function AddEmployee() {
   const [shift, setShift] = useState(shifts[0]?.name || '');
   const [doj, setDoj] = useState('');
   const [doe, setDoe] = useState('');
+  const [probationEndDate, setProbationEndDate] = useState('');
+  const [contractEndDate, setContractEndDate] = useState('');
   const [commissionEligible, setCommissionEligible] = useState(false);
   const [salBasic, setSalBasic] = useState(0);
   const [salHouse, setSalHouse] = useState(0);
@@ -213,16 +216,23 @@ export default function AddEmployee() {
     setSaving(true);
     setTimeout(() => {
       addEmployee({
-        id: 'EMP' + String(Date.now()).slice(-3),
+        // Use a stable UUID for internal id and keep `employee_id` for human-readable short id
+        id: (typeof crypto !== 'undefined' && (crypto as any).randomUUID) ? (crypto as any).randomUUID() : 'EMP' + String(Date.now()).slice(-3),
+        employee_id: employeeIdInput || 'EMP' + String(Date.now()).slice(-3),
         name: fullName, fatherName, dob, cnic, gender, department: dept, designation: desig,
         employmentType: empType, jobStatus: jobStat, workMode: wMode, workLocation: wLoc,
         shift, reportingManager: rm, dateOfJoining: doj, dateOfExit: doe || undefined,
+        probation_end_date: probationEndDate || undefined,
+        contract_end_date: contractEndDate || undefined,
         contact1, contact2, emergency1: ice1, emergency2: ice2,
         permanentAddress: permAddress, postalAddress: sameAddress ? permAddress : postAddress,
         bankName, bankAccount, paymentMode, bloodGroup, allergies, chronicConditions: chronic,
         medications, avatar: fullName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2),
         commissionEligible,
         salary: { basic: salBasic, houseRent: salHouse, medical: salMedical, conveyance: salConveyance, commission: commissionEligible ? salCommission : 0 },
+        // metadata timestamps
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       });
       setSaving(false); showToast('Employee saved successfully'); navigate('/employees');
     }, 800);

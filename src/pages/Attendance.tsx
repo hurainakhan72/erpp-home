@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { BRANCHES, EMP_DATA } from './attendanceTypes';
 
 type ShiftType = 'Morning' | 'Evening' | 'Night';
 type EmployeeStatus = 'Present' | 'Late' | 'Absent' | 'On Leave';
@@ -542,6 +543,35 @@ const Attendance = () => {
                 <div style={{ display: 'flex', gap: 6 }}>
                   <button className="btn" style={{ background: 'rgba(255,255,255,.2)', border: 'none', color: '#fff' }} type="button">📤 Export</button>
                   <button className="btn" style={{ background: 'rgba(255,255,255,.2)', border: 'none', color: '#fff' }} type="button">📥 Import</button>
+                  {(activeRole === 'branch_hr' || activeRole === 'department_hr') && (
+                    <button
+                      className="btn prim"
+                      type="button"
+                      onClick={() => {
+                        const branchName = (user && (user as any).branch) || BRANCHES[0].name;
+                        const branchObj = BRANCHES.find(b => b.name === branchName) || BRANCHES[0];
+                        const branchId = branchObj.id;
+                        const data = EMP_DATA[branchId] || attendanceRows.map(r => ({ name: r.name, code: r.code, dept: r.dept, shift: r.shift, ci: r.ci, co: r.co, status: r.status, note: r.notes }));
+
+                        // mark local rows as submitted
+                        setAttendanceRows(prev => prev.map(emp => ({ ...emp, state: 'submitted' })));
+
+                        window.dispatchEvent(new CustomEvent('attendanceSheetSubmitted', {
+                          detail: {
+                            branchId,
+                            branchName: branchObj.name,
+                            date: new Date().toISOString().split('T')[0],
+                            lockedBy: (user && (user as any).username) || 'Branch HR',
+                            data,
+                          }
+                        }));
+
+                        alert('Sheet submitted to Head HR');
+                      }}
+                    >
+                      📨 Submit Sheet
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

@@ -212,32 +212,7 @@ export default function Sidebar() {
         </>
       )}
 
-      <div className="sb-div" />
-      <div className="sb-sec">
-        <div className="sb-lbl">Workflow Role</div>
-        <div style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--t2)', padding: 12, borderRadius: 12, background: 'rgba(148,163,184,.08)' }}>
-          {activeRole === 'super_admin' && (
-            <>
-              🔴 <strong>Super Admin:</strong> Full system oversight. Access all branches, departments, configurations, and audit logs. Can manage HR accounts and view final reports.
-            </>
-          )}
-          {activeRole === 'head_hr' && (
-            <>
-              🟠 <strong>Head HR:</strong> Company-wide visibility. Access all branches and departments like Super Admin. Review all attendance, leave, and payroll across the organization.
-            </>
-          )}
-          {activeRole === 'branch_hr' && (
-            <>
-              🟡 <strong>Branch HR:</strong> Branch-level manager. Access only {user?.branch} branch data. Manage attendance, leave, payroll, and employee records for your branch.
-            </>
-          )}
-          {activeRole === 'department_hr' && (
-            <>
-              🟢 <strong>Department HR:</strong> Department-level manager. Access only {user?.departments?.[0]} department in {user?.branch}. Manage records for your department only.
-            </>
-          )}
-        </div>
-      </div>
+      {/* Workflow Role UI removed per request */}
 
       <div className="sb-bottom">
         <div className="sb-user">

@@ -8,7 +8,6 @@ const routeNames: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/launchpad": "Launchpad",
   "/hr/branch-dashboard": "Branch HR Dashboard",
-  "/penalty-workflow": "Penalty Workflow",
   "/leave-capacity": "Leave Capacity",
   "/onboarding": "Onboarding",
   "/org-management": "Org Management",
@@ -56,11 +55,23 @@ export default function Topbar() {
     }
   };
 
-  const pageName =
-    routeNames[location.pathname] ||
-    (location.pathname.startsWith("/settings/")
-      ? location.pathname.split("/").pop()?.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
-      : "Page");
+  // normalize path: remove query, hash and trailing slash for consistent matching
+  const path = (() => {
+    const p = location.pathname.split(/[?#]/)[0];
+    return p.replace(/\/+$/, '') || '/';
+  })();
+
+  const pageName = (() => {
+    if (routeNames[path]) return routeNames[path];
+    // try longest-prefix match for routes like /employees/123 or /settings/whatever
+    const keys = Object.keys(routeNames).sort((a, b) => b.length - a.length);
+    const matched = keys.find(k => path.startsWith(k));
+    if (matched) return routeNames[matched];
+    if (path.startsWith("/settings/")) {
+      return path.split("/").pop()?.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) || "Settings";
+    }
+    return "Page";
+  })();
 
   const dateStr = time.toLocaleDateString("en-PK", {
     weekday: "short",
@@ -77,7 +88,6 @@ export default function Topbar() {
     '/launchpad': Zap,
     '/dashboard': LayoutDashboard,
     '/hr/branch-dashboard': LayoutDashboard,
-    '/penalty-workflow': ClipboardList,
     '/leave-capacity': CalendarDays,
     '/onboarding': Users,
     '/org-management': Settings,
@@ -106,7 +116,13 @@ export default function Topbar() {
     '/my-profile': Users,
   };
 
-  const currentIcon = routeIcons[location.pathname] || (location.pathname.startsWith('/settings/') ? Settings : LayoutDashboard);
+  const currentIcon = (() => {
+    if (routeIcons[path]) return routeIcons[path];
+    const keys = Object.keys(routeIcons).sort((a, b) => b.length - a.length);
+    const matched = keys.find(k => path.startsWith(k));
+    if (matched) return routeIcons[matched];
+    return path.startsWith('/settings/') ? Settings : LayoutDashboard;
+  })();
   const PageIcon = currentIcon;
   const notifications = leaveRequests.filter((item: any) => item.status === "Pending").slice(0, 5);
 

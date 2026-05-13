@@ -7,7 +7,7 @@ import {
   Users, UserCheck, CalendarDays, AlertTriangle,
   Activity, Cake, TrendingUp, BarChart3, Plus,
   Megaphone, Bell, ShieldAlert, FileText,
-  Target, Award, Clock,
+  Target, Award, Clock, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis,
@@ -56,6 +56,13 @@ const G = `
   ::-webkit-scrollbar{width:3px;}
   ::-webkit-scrollbar-track{background:transparent;}
   ::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:3px;}
+  .cal-day{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:11px;cursor:default;position:relative;transition:background .12s;}
+  .cal-day.today{background:#6366f1;color:#fff;font-weight:700;}
+  .cal-day.has-event{font-weight:600;color:#1e1b4b;}
+  .cal-day.has-event::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:#6366f1;}
+  .cal-day.today::after{background:#fff;}
+  .cal-day.birthday::after{background:#ec4899;}
+  .cal-day.today.birthday::after{background:#fff;}
 `;
 
 // ─── Reusable mini components ─────────────────────────────────────────────────
@@ -90,6 +97,123 @@ const SHead = ({ icon, title, right }: { icon:React.ReactNode; title:string; rig
     {right && <div style={{marginLeft:"auto"}}>{right}</div>}
   </div>
 );
+
+// Mini Calendar component (compact month view + events + birthdays)
+function MiniCalendar({ employees, events }: { employees: any[]; events: any[] }) {
+  const today = new Date();
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
+
+  const prevMonth = () => {
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); }
+    else setViewMonth(m => m - 1);
+  };
+  const nextMonth = () => {
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); }
+    else setViewMonth(m => m + 1);
+  };
+
+  const firstDay  = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMon = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+  const birthdayDates = new Set<number>();
+  employees.forEach(emp => {
+    if (!emp.dob) return;
+    const dob = new Date(emp.dob);
+    if (dob.getMonth() === viewMonth) birthdayDates.add(dob.getDate());
+  });
+
+  const eventDates = new Set<number>();
+  events.forEach((ev:any) => {
+    if (!ev || !ev.date) return;
+    const d = new Date(`${ev.date}T00:00:00`);
+    if (d.getMonth() === viewMonth && d.getFullYear() === viewYear) eventDates.add(d.getDate());
+  });
+
+  const monthEvents = events.filter((ev:any) => {
+    if (!ev || !ev.date) return false;
+    const d = new Date(`${ev.date}T00:00:00`);
+    return d.getMonth() === viewMonth && d.getFullYear() === viewYear;
+  });
+
+  const monthBirthdays = employees.filter(emp => {
+    if (!emp.dob) return false;
+    const dob = new Date(emp.dob);
+    return dob.getMonth() === viewMonth;
+  });
+
+  const cells: (number|null)[] = [...Array(firstDay).fill(null), ...Array.from({length: daysInMon}, (_,i) => i+1)];
+
+  return (
+    <div>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+        <button onClick={prevMonth} style={{background:"none",border:"none",cursor:"pointer",color:"#9ca3af"}}><ChevronLeft size={14} /></button>
+        <span style={{fontSize:12,fontWeight:700,color:"#1e1b4b"}}>{MONTH_NAMES[viewMonth].slice(0,3)} {viewYear}</span>
+        <button onClick={nextMonth} style={{background:"none",border:"none",cursor:"pointer",color:"#9ca3af"}}><ChevronRight size={14} /></button>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",marginBottom:4}}>
+        {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
+          <div key={d} style={{textAlign:"center",fontSize:9,color:"#d1d5db",fontWeight:600,paddingBottom:4}}>{d}</div>
+        ))}
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",rowGap:2}}>
+        {cells.map((day,i) => {
+          if (!day) return <div key={i} />;
+          const isToday = day === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear();
+          const hasBday = birthdayDates.has(day);
+          const hasEvent = eventDates.has(day);
+          let cls = "cal-day";
+          if (isToday) cls += " today";
+          if (hasEvent) cls += " has-event";
+          if (hasBday) cls += " birthday";
+          return <div key={i} style={{display:"flex",justifyContent:"center"}}><div className={cls}>{day}</div></div>;
+        })}
+      </div>
+
+      <div style={{display:"flex",gap:12,marginTop:10,flexWrap:"wrap"}}>
+        <div style={{display:"flex",alignItems:"center",gap:4,fontSize:9,color:"#9ca3af"}}><span style={{width:6,height:6,borderRadius:"50%",background:"#6366f1",display:"inline-block"}}/> Event</div>
+        <div style={{display:"flex",alignItems:"center",gap:4,fontSize:9,color:"#9ca3af"}}><span style={{width:6,height:6,borderRadius:"50%",background:"#ec4899",display:"inline-block"}}/> Birthday</div>
+      </div>
+
+      {monthEvents.length > 0 && (
+        <div style={{marginTop:12,borderTop:"1px solid #f3f4f6",paddingTop:10}}>
+          <div style={{fontSize:10,fontWeight:700,color:"#6b7280",marginBottom:6}}>Events this month</div>
+          {monthEvents.map((ev:any,i:number) => {
+            const d = new Date(ev.date);
+            const color = ev.type === 'holiday' ? '#ef4444' : (ev.type === 'meeting' ? '#3b82f6' : '#6b7280');
+            return (
+              <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"4px 0",borderBottom:i<monthEvents.length-1?"1px solid #f9fafb":"none"}}>
+                <span style={{width:7,height:7,borderRadius:"50%",background:color,flexShrink:0}}/>
+                <span style={{fontSize:10,color:"#374151",flex:1}}>{ev.title}</span>
+                <span style={{fontSize:9,color:"#d1d5db",whiteSpace:"nowrap"}}>{d.getDate()} {MONTH_NAMES[d.getMonth()].slice(0,3)}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {monthBirthdays.length > 0 && (
+        <div style={{marginTop:10,borderTop:"1px solid #f3f4f6",paddingTop:10}}>
+          <div style={{fontSize:10,fontWeight:700,color:"#6b7280",marginBottom:6}}>🎂 Birthdays this month</div>
+          {monthBirthdays.map((emp,i) => {
+            const dob = new Date(emp.dob);
+            const ini = emp.name.split(" ").map((n:string)=>n[0]).join("").slice(0,2).toUpperCase();
+            const color = AV_COLORS[i % AV_COLORS.length];
+            return (
+              <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"4px 0",borderBottom:i<monthBirthdays.length-1?"1px solid #f9fafb":"none"}}>
+                <div style={{width:22,height:22,borderRadius:6,background:color,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,fontWeight:700,flexShrink:0}}>{ini}</div>
+                <span style={{fontSize:10,color:"#374151",flex:1}}>{emp.name}</span>
+                <span style={{fontSize:9,color:"#ec4899",fontWeight:600,whiteSpace:"nowrap"}}>{dob.getDate()} {MONTH_NAMES[dob.getMonth()].slice(0,3)}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ══════════════════════════════════════════════════════════════════════════════
 export default function Dashboard() {
@@ -278,9 +402,10 @@ export default function Dashboard() {
 
   // ── Upcoming birthdays (integrated with calendar) ──
   const birthdays = useMemo(() => {
+    const source = (filteredEmployees && filteredEmployees.length) ? filteredEmployees : employees || [];
     const today = new Date(); today.setHours(0,0,0,0);
     const list: {name:string; dept:string; date:Date; daysUntil:number; ini:string; color:string}[] = [];
-    filteredEmployees?.forEach((emp:any, idx:number) => {
+    source.forEach((emp:any, idx:number) => {
       if (!emp.dob) return;
       const dob = new Date(emp.dob);
       let bday = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
@@ -298,7 +423,7 @@ export default function Dashboard() {
       }
     });
     return list.sort((a,b) => a.daysUntil - b.daysUntil);
-  }, [filteredEmployees]);
+  }, [filteredEmployees, employees]);
 
   // ─────────────────────────────────────────────────────────────────────────────
   return (
@@ -573,30 +698,21 @@ export default function Dashboard() {
         {/* ══ CALENDAR + BIRTHDAYS (Same size as other cards) ════════════════ */}
         <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:14}}>
 
-          {/* Calendar - Exactly same size as other cards */}
-          <WCard onClick={() => navigate('/calendar')}>
-            <SHead 
-              icon={<CalendarDays size={14} color="#6366f1" />} 
-              title="Calendar — Events" 
+          {/* Calendar - compact mini calendar that syncs with DataContext */}
+          <WCard>
+            <SHead
+              icon={<CalendarDays size={14} color="#6366f1" />}
+              title="Calendar — Events"
               right={
-                <button 
-                  onClick={() => navigate("/calendar")} 
-                  style={{ 
-                    fontSize: 11, 
-                    color: "#6366f1", 
-                    fontWeight: 600, 
-                    background: "none", 
-                    border: "none", 
-                    cursor: "pointer" 
-                  }}
+                <button
+                  onClick={() => navigate("/calendar")}
+                  style={{ fontSize: 11, color: "#6366f1", fontWeight: 600, background: "none", border: "none", cursor: "pointer" }}
                 >
                   View Full →
                 </button>
               }
             />
-            <div style={{transform: "scale(0.88)", transformOrigin: "top left", width: "113%"}}>
-              <Calendar />
-            </div>
+            <MiniCalendar employees={(filteredEmployees && filteredEmployees.length) ? filteredEmployees : employees} events={(globalDays || []).map((g:any) => ({ date: g.date, title: g.title || g.type, type: g.type }))} />
           </WCard>
 
           {/* Birthdays - Exactly same size as other cards */}
@@ -606,7 +722,7 @@ export default function Dashboard() {
               title="Upcoming Birthdays"
               right={
                 <span style={{background:"#fdf2f8", color:"#ec4899", padding:"3px 9px", borderRadius:20, fontSize:10, fontWeight:700}}>
-                  {birthdays.length} this month
+                  Birthdays this month · {birthdays.length}
                 </span>
               }
             />
