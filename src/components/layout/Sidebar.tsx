@@ -8,6 +8,7 @@ import {
   ScrollText, LogOut, ChevronDown, ChevronRight, Zap
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
+import { useToastContext } from '../../context/ToastContext';
 import logo from '../../images/logo.png';
 
 type SidebarLink = {
@@ -15,6 +16,7 @@ type SidebarLink = {
   icon: React.ComponentType<any>;
   label: string;
   badge?: string;
+  comingSoon?: boolean;
 };
 
 export default function Sidebar() {
@@ -34,11 +36,11 @@ export default function Sidebar() {
   const initials = getUserInitials(user?.username || '');
 
   const superAdminLinks: SidebarLink[] = [
-    { to: '/launchpad', icon: Zap, label: 'Launchpad' },
+    { to: '/launchpad', icon: Zap, label: 'Launchpad', comingSoon: true },
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/hr/branch-dashboard', icon: Building2, label: 'Branch HR Dashboard' },
-    { to: '/overview', icon: Monitor, label: 'Overview' },
-    { to: '/saved-reports', icon: ScrollText, label: 'Saved Reports' },
+    { to: '/overview', icon: Monitor, label: 'Overview', comingSoon: true },
+    { to: '/saved-reports', icon: ScrollText, label: 'Saved Reports', comingSoon: true },
     { to: '/attendance-head-review', icon: ShieldCheck, label: 'Head HR Review' },
     { to: '/attendance-report', icon: ClipboardList, label: 'Final Attendance Report' },
     { to: '/directory', icon: MapPin, label: 'Directory' },
@@ -49,7 +51,7 @@ export default function Sidebar() {
     { to: '/leave-wallet', icon: Wallet, label: 'Leave Wallet' },
     { to: '/penalty-ledger', icon: ClipboardList, label: 'Penalty Ledger' },
     { to: '/announcements', icon: Zap, label: 'Announcements' },
-    { to: '/calendar', icon: CalendarRange, label: 'Calendar Events' },
+    { to: '/calendar', icon: CalendarRange, label: 'Calendar Events', comingSoon: true },
     { to: '/accounts', icon: ShieldCheck, label: 'HR Accounts' },
     { to: '/audit-log', icon: ScrollText, label: 'Audit Log' },
   ];
@@ -89,6 +91,8 @@ export default function Sidebar() {
     activeRole === 'branch_hr' ? branchHrLinks :
     activeRole === 'department_hr' ? departmentHrLinks :
     [];
+
+  const { showToast } = useToastContext();
 
   const settingsLinks = [
     { to: '/settings/departments', label: 'Departments' },
@@ -139,11 +143,19 @@ export default function Sidebar() {
       <div className="sb-sec">
         <div className="sb-lbl">Core Modules</div>
         {mainLinks.map(link => (
-          <NavLink key={link.to} to={link.to} className={({ isActive }) => `nav-a ${isActive ? 'active' : ''}`}>
-            <link.icon size={14} className="nav-ico" />
-            {link.label}
-            {link.badge && <span className="nav-badge">{link.badge}</span>}
-          </NavLink>
+          link.comingSoon ? (
+            <div key={link.to} className={`nav-a`} onClick={() => showToast('Coming soon', 'error')} style={{ cursor: 'pointer' }}>
+              <link.icon size={14} className="nav-ico" />
+              {link.label}
+              {link.badge && <span className="nav-badge">{link.badge}</span>}
+            </div>
+          ) : (
+            <NavLink key={link.to} to={link.to} className={({ isActive }) => `nav-a ${isActive ? 'active' : ''}`}>
+              <link.icon size={14} className="nav-ico" />
+              {link.label}
+              {link.badge && <span className="nav-badge">{link.badge}</span>}
+            </NavLink>
+          )
         ))}
       </div>
 

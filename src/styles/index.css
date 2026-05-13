@@ -116,11 +116,11 @@ body {
   background: linear-gradient(180deg, rgba(236,72,153,.15) 0%, rgba(59,130,246,.12) 40%, rgba(168,85,247,.1) 100%);
   display: flex; flex-direction: column;
   flex-shrink: 0; overflow-y: auto;
-  scrollbar-width: none; position: fixed; left: 0; top: 0; bottom: 0;
+  scrollbar-width: thin; position: fixed; left: 0; top: 0; bottom: 0;
   border-right: 1px solid rgba(59,130,246,.18);
   box-shadow: 0 24px 64px rgba(59,130,246,.08);
 }
-.sidebar::-webkit-scrollbar { display: none; }
+/* show sidebar scrollbar for mouse wheel and touchpad scrolling */
 .sidebar::after {
   content: ''; position: absolute; right: 0;
   top: 0; bottom: 0; width: 1px;
