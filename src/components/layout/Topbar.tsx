@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { Search, LogOut, ShieldCheck as ShieldIcon, LayoutDashboard, Users, CalendarCheck, CalendarDays, DollarSign, TrendingUp, ScrollText, Settings, ClipboardList, Clock, CalendarRange, Bell, Zap, Wallet } from "lucide-react";
@@ -37,11 +37,15 @@ const routeNames: Record<string, string> = {
 
 export default function Topbar() {
   const auth = useAuth(); // Poora object le rahe hain error se bachne ke liye
-  const { leaveRequests } = useData();
+  const { leaveRequests, employees } = useData();
   const location = useLocation();
   const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
   const [showNotifications, setShowNotifications] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showSearch, setShowSearch] = useState(false);
+  const searchRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -135,10 +139,46 @@ export default function Topbar() {
         <span className="bc-cur">{pageName}</span>
       </div>
 
-      <div className="topbar-search" style={{ marginLeft: "auto", marginRight: 8 }}>
+      <div className="topbar-search" style={{ marginLeft: "auto", marginRight: 8, position: 'relative' }}>
         <Search size={13} style={{ color: "var(--t3)" }} />
-        <span>Search employees, records, reports...</span>
+        <input
+          ref={searchRef}
+          value={searchQuery}
+          onChange={(e) => {
+            const q = e.target.value;
+            setSearchQuery(q);
+            if (!q) { setSearchResults([]); setShowSearch(false); return; }
+            const qq = q.toLowerCase();
+            const results = (employees || []).filter((emp: any) => emp.name.toLowerCase().includes(qq) || (emp.id || '').toLowerCase().includes(qq)).slice(0,8);
+            setSearchResults(results);
+            setShowSearch(true);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              if (searchResults.length === 1) {
+                navigate(`/employees/${searchResults[0].id}`);
+                setSearchQuery(''); setSearchResults([]); setShowSearch(false);
+              }
+            } else if (e.key === 'Escape') {
+              setShowSearch(false);
+            }
+          }}
+          placeholder="Search employees, records, reports..."
+          style={{ background: 'transparent', border: 'none', outline: 'none', marginLeft: 8, color: 'var(--t3)', width: 260 }}
+          onFocus={() => { if (searchResults.length) setShowSearch(true); }}
+        />
         <kbd>⌘K</kbd>
+        {showSearch && searchResults.length > 0 && (
+          <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: 360, background: '#fff', border: '1px solid var(--br)', borderRadius: 10, boxShadow: 'var(--sh2)', zIndex: 120 }}>
+            {searchResults.map(r => (
+              <div key={r.id} onClick={() => { navigate(`/employees/${r.id}`); setSearchQuery(''); setSearchResults([]); setShowSearch(false); }} style={{ padding: 10, cursor: 'pointer', borderBottom: '1px solid var(--br2)' }}>
+                <div style={{ fontWeight: 700 }}>{r.name} <span style={{ fontFamily: 'IBM Plex Mono, monospace', fontSize: 12, marginLeft: 8, color: 'var(--t3)' }}>{r.id}</span></div>
+                <div style={{ fontSize: 12, color: 'var(--t3)' }}>{r.designation} · {r.department}</div>
+              </div>
+            ))}
+            <div style={{ padding: 8, fontSize: 12, color: 'var(--t3)' }}>Press <strong>Enter</strong> to open first result</div>
+          </div>
+        )}
       </div>
 
       <div className="topbar-right">

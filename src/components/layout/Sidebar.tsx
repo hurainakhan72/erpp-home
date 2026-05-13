@@ -8,6 +8,7 @@ import {
   ScrollText, LogOut, ChevronDown, ChevronRight, Zap
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
+import logo from '../../images/logo.png';
 
 type SidebarLink = {
   to: string;
@@ -56,10 +57,9 @@ export default function Sidebar() {
   // Head HR - Same as Superadmin (Full Company Access)
   const headHrLinks: SidebarLink[] = superAdminLinks;
 
-  // Branch HR - Branch level access
+  // Branch HR - Branch level access (no branch-dashboard link here)
   const branchHrLinks: SidebarLink[] = [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/hr/branch-dashboard', icon: Building2, label: 'Branch Dashboard' },
     { to: '/directory', icon: MapPin, label: 'Directory' },
     { to: '/employees', icon: Users, label: 'Employees' },
     { to: '/attendance', icon: CalendarCheck, label: 'Attendance', badge: '3' },
@@ -125,10 +125,12 @@ export default function Sidebar() {
     <div className="sidebar">
       <div className="sb-logo">
         <div className="sb-logo-row">
-          {/* Logo icon (sb-mark) yahan se hata diya gaya hai */}
-          <div>
-            <div className="sb-title">EMS</div>
-            <div className="sb-subtitle">Employee Management</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <img src={logo} alt="Company Logo" className="sb-logo-img" />
+            <div>
+              <div className="sb-title">EMS</div>
+              <div className="sb-subtitle">Employee Management</div>
+            </div>
           </div>
         </div>
         {/* Prototype wala pura section yahan se remove kar diya gaya hai */}
@@ -150,6 +152,7 @@ export default function Sidebar() {
         <div className="sb-lbl">Live Status</div>
         <div className="card" style={{ padding: 12, borderRadius: 14, marginBottom: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--t2)', marginBottom: 7 }}>
+            <div className="sb-env-dot" style={{ background: liveAttendance >= 50 ? 'var(--greens)' : 'var(--amber)', boxShadow: '0 6px 14px rgba(15,23,42,.08)' }} />
             <Clock size={13} />
             Attendance Live
           </div>
@@ -158,6 +161,7 @@ export default function Sidebar() {
         </div>
         <div className="card" style={{ padding: 12, borderRadius: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--t2)', marginBottom: 7 }}>
+            <div className="sb-env-dot" style={{ background: pendingLeave > 0 ? 'var(--red)' : undefined, boxShadow: pendingLeave > 0 ? '0 6px 14px rgba(239,68,68,.12)' : undefined }} />
             <Bell size={13} />
             Notifications
           </div>

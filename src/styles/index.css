@@ -128,9 +128,10 @@ body {
   pointer-events: none;
 }
 .sb-logo { padding: 24px 22px 22px; border-bottom: 1px solid rgba(59,130,246,.12); }
-.sb-logo-row { display: flex; align-items: center; gap: 12px; }
-.sb-title { font-size: 18px; font-weight: 800; color: var(--t1); letter-spacing: -.4px; }
-.sb-subtitle { font-size: 11px; color: var(--t3); margin-top: 2px; font-family: 'IBM Plex Mono', monospace; letter-spacing: .06em; }
+.sb-logo-row { display: flex; align-items: center; gap: 10px; }
+.sb-logo-img { width: 72px; height: auto; border-radius: 6px; box-shadow: 0 10px 22px rgba(15,23,42,.10); object-fit: contain; }
+.sb-title { font-size: 14px; font-weight: 800; color: var(--t1); letter-spacing: -.3px; }
+.sb-subtitle { font-size: 10px; color: var(--t3); margin-top: 2px; font-family: 'IBM Plex Mono', monospace; letter-spacing: .04em; }
 .sb-env {
   display: flex; align-items: center; gap: 6px;
   margin-top: 14px; padding: 9px 12px;
